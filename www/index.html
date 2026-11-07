@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>SFL Bypass</title>
+<style>
+:root{color-scheme:light dark;--bg:#fff;--panel:#fff;--ink:#101114;--muted:#687080;--line:#dedfe4;--accent:#55c8f5;--accent2:#9be5ff;--shadow:0 12px 34px rgba(0,0,0,.07)}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--panel:#050505;--ink:#f6f7fb;--muted:#aab1c0;--line:#24262b;--shadow:0 12px 34px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.wrap{width:min(680px,100%);margin:auto;padding:34px 20px 60px}
+.pill{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:30px;padding:9px 17px;color:var(--accent);font-weight:700;letter-spacing:2px;font-size:13px}
+.dot{width:10px;height:10px;background:var(--accent);border-radius:50%;box-shadow:0 0 14px var(--accent)}
+h1{font-size:clamp(32px,7vw,54px);line-height:1.12;letter-spacing:-1.8px;margin:34px 0 24px}
+h1 span{color:var(--accent)}
+.intro{font-size:clamp(16px,4vw,21px);line-height:1.65;color:var(--muted);margin-bottom:42px}
+.panel,.step{border:1px solid var(--line);border-radius:28px;background:var(--panel);padding:28px;margin-bottom:22px;box-shadow:var(--shadow)}
+label{display:block;color:var(--muted);margin:0 0 10px;font-size:15px}
+input{width:100%;background:transparent;color:var(--ink);border:2px solid var(--accent);border-radius:19px;padding:18px 20px;font-size:17px;outline:none;margin-bottom:16px}
+input:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+button{border:0;border-radius:18px;padding:16px 18px;font-size:17px;font-weight:750;cursor:pointer;background:var(--accent);color:#06131b;width:100%;margin:5px 0}
+button.secondary{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:active{transform:scale(.99)}
+button:disabled{opacity:0.6;cursor:not-allowed}
+.check{display:flex;align-items:center;gap:12px;margin:16px 0 0;color:var(--muted);font-size:16px}
+.check input{width:22px;height:22px;margin:0;accent-color:var(--accent)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.actions button{font-size:14px;padding:15px 8px}
+.hidden{display:none!important}
+.status{margin-top:14px;color:var(--muted);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.step{border-radius:22px;padding:22px}
+.num{color:var(--accent);font-weight:800;font-size:17px;margin-bottom:10px}
+.step p{margin:0;color:var(--muted);line-height:1.6}
+.tabs{display:flex;gap:8px;margin-bottom:18px}
+.tabs button{width:50%;background:transparent;border:1px solid var(--line);color:var(--muted)}
+.tabs button.active{background:var(--accent);color:#06131b;border-color:var(--accent)}
+.small{font-size:13px;color:var(--muted);line-height:1.55}
+.toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px}
+.toprow button{width:auto;margin:0;padding:10px 14px;font-size:13px}
+.user{font-size:13px;color:var(--muted);text-align:right;line-height:1.5;cursor:pointer;padding:8px 10px;border:1px solid var(--line);border-radius:14px}
+.user strong{display:block;color:var(--ink)}
+.user small{display:block;color:var(--accent);font-size:12px;font-variant-numeric:tabular-nums}
+.error{color:#e35d68}
+.success{color:#179b69}
+.pw-wrap{position:relative;margin-bottom:16px}
+.pw-wrap input{margin-bottom:0;padding-right:58px}
+.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;margin:0;padding:0;background:transparent;border:0;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer}
+.eye:hover{color:var(--accent)}
+.eye:active{transform:translateY(-50%) scale(.96)}
+.eye svg{width:22px;height:22px;display:block;pointer-events:none}
+.server-tip{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+.account-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.58);backdrop-filter:blur(5px)}
+.account-modal{width:min(420px,100%);max-height:min(80vh,620px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.account-modal h2{margin:0 0 18px;font-size:23px}
+.account-info{border:1px solid var(--line);border-radius:16px;padding:15px;margin:14px 0 18px;line-height:1.8;overflow-wrap:anywhere}
+.account-info strong{color:var(--accent)}
+.account-modal .close-modal{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.account-modal button{margin-top:9px}
+.spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s ease-in-out infinite; margin-right: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.warning-box { background: rgba(255, 152, 0, 0.15); border: 1px solid #ff9800; color: #ff9800; padding: 12px; border-radius: 12px; margin-bottom: 12px; font-weight: bold; line-height: 1.5; text-align: center; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<div class="toprow">
+  <div class="pill"><i class="dot"></i>SFL BYPASS</div>
+  <div id="userTag" class="user" role="button" tabindex="0" aria-label="Buka pengaturan akun"></div>
+</div>
+
+<section id="loginView">
+  <h1>Masuk dulu,<br><span>baru lanjut.</span></h1>
+  <p class="intro">Login untuk menggunakan alat pembaca tujuan link SFL.</p>
+  <div class="panel">
+    <div class="tabs">
+      <button id="loginTab" class="active" type="button">Masuk</button>
+      <button id="registerTab" type="button">Daftar</button>
+    </div>
+
+    <div id="loginForm">
+      <label>Username</label>
+      <input id="loginUser" autocomplete="username" placeholder="Masukkan username">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="Masukkan password">
+        <button type="button" class="eye" id="loginEye" aria-label="Tampilkan password" aria-pressed="false"></button>
+      </div>
+      <button id="loginBtn">Masuk</button>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <label>Buat username</label>
+      <input id="regUser" placeholder="Username baru">
+      <label>Buat password</label>
+      <div class="pw-wrap">
+        <input id="regPass" type="password" placeholder="Minimal 6 karakter">
+        <button type="button" class="eye" id="regEye" aria-label="Tampilkan password" aria-pressed="false"></button>
+      </div>
+      <button id="regBtn">Daftar akun</button>
+      <p class="small">Akun daftar berlaku 24 jam (1 hari) sejak didaftarkan. Setelah habis akun tidak bisa dipakai lagi. Maksimal 3 pendaftaran pada browser ini.</p>
+    </div>
+
+    <div id="authMsg" class="status" role="status"></div>
+  </div>
+  <p class="small">Catatan: sistem akun, klaim akun, dan sesi hanya tersimpan di browser/perangkat ini.</p>
+</section>
+
+<section id="appView" class="hidden">
+  <h1>Lewati link <span>SFL,</span><br>langsung ke tujuan.</h1>
+  <p class="intro">Tempel link SFL di bawah. Alat ini memanggil server untuk membaca alamat tujuan yang tersembunyi.</p>
+  <div class="panel">
+    <label for="sflInput">Link SFL</label>
+    <input id="sflInput" type="url" placeholder="https://sfl.gl/xxxxxx">
+    
+    <div id="limitInfo" class="status small" style="margin-bottom: 10px; color: var(--accent); font-weight: bold;"></div>
+    
+    <button id="bypassBtn">Bypass</button>
+    <label class="check"><input id="autoOpen" type="checkbox" checked>Otomatis buka link tujuan</label>
+    <div id="result" class="status" aria-live="polite"></div>
+    <div id="manualActions" class="actions hidden">
+      <button class="secondary" id="openBtn">Buka link</button>
+      <button class="secondary" id="copyBtn">Salin link utama</button>
+    </div>
+    <div id="serverTip" class="server-tip"></div>
+  </div>
+  <div class="step"><div class="num">01</div><p>Salin link SFL yang ingin dibuka.</p></div>
+  <div class="step"><div class="num">02</div><p>Tempel link ke kolom di atas, lalu tekan tombol <b>Bypass</b>.</p></div>
+  <div class="step"><div class="num">03</div><p>Jika tujuan ditemukan, link akan dibuka otomatis. Matikan centang untuk memilih membuka atau menyalin link secara manual.</p></div>
+  <div class="step"><div class="num">04</div><p>Jika link tujuan tidak terdeteksi, berarti alamatnya benar-benar tersembunyi di server SFL. Alat ini tidak menerobos CAPTCHA, login, atau proteksi server.</p></div>
+</section>
+</main>
+
+<div id="accountOverlay" class="account-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+  <div class="account-modal">
+    <h2 id="accountModalTitle">Pengaturan Akun</h2>
+    <button id="logoutBtn" type="button">LOG OUT</button>
+    <button id="accountInfoBtn" type="button" class="secondary">INFORMASI</button>
+    <div id="accountInfo" class="account-info hidden" aria-live="polite"></div>
+    <button id="closeAccountModal" type="button" class="close-modal">× KELUAR</button>
+  </div>
+</div>
+
+<script>
+  const ACCOUNTS = [
+  {"username": "OWNER ALBY", "password": "OKEGAS", "owner": true},
+  {"username": "ALBY001", "password": "ThnkVMNNGF", "owner": false},
+  {"username": "ALBY002", "password": "ZXFlH3gNMu", "owner": false},
+  {"username": "ALBY003", "password": "aaYnIe5LBD", "owner": false},
+  {"username": "ALBY004", "password": "PJ7spv2UH0", "owner": false},
+  {"username": "ALBY005", "password": "uogXm0ykI7", "owner": false},
+  {"username": "ALBY006", "password": "qto5PpBQMR", "owner": false},
+  {"username": "ALBY007", "password": "QKmIRcZ8Mo", "owner": false},
+  {"username": "ALBY008", "password": "Lr8XvcBNHq", "owner": false},
+  {"username": "ALBY009", "password": "xlUJdpYbm3", "owner": false},
+  {"username": "ALBY010", "password": "3kgseFeJvT", "owner": false},
+  {"username": "ALBY011", "password": "9Dr39lkxOZ", "owner": false},
+  {"username": "ALBY012", "password": "3i1ShO5rVg", "owner": false},
+  {"username": "ALBY013", "password": "CHt2ZB3Uli", "owner": false},
+  {"username": "ALBY014", "password": "ocQ82Ynrfg", "owner": false},
+  {"username": "ALBY015", "password": "3GLqX9nZ2E", "owner": false},
+  {"username": "ALBY016", "password": "ss8HjKDDuF", "owner": false},
+  {"username": "ALBY017", "password": "KPuKQacXh3", "owner": false},
+  {"username": "ALBY018", "password": "sk4l3fvnwW", "owner": false},
+  {"username": "ALBY019", "password": "AZl4UNBWuf", "owner": false},
+  {"username": "ALBY020", "password": "pldqWqQI62", "owner": false},
+  {"username": "ALBY021", "password": "qCQlYBb8me", "owner": false},
+  {"username": "ALBY022", "password": "i7u3XLyp7n", "owner": false},
+  {"username": "ALBY023", "password": "rfvd13fLAk", "owner": false},
+  {"username": "ALBY024", "password": "aKaFGOV5RR", "owner": false},
+  {"username": "ALBY025", "password": "M8ROPFcY6P", "owner": false},
+  {"username": "ALBY026", "password": "jKludx8tCN", "owner": false},
+  {"username": "ALBY027", "password": "LRgj3Mumz6", "owner": false},
+  {"username": "ALBY028", "password": "Kpd1kFDdVi", "owner": false},
+  {"username": "ALBY029", "password": "yyKMLLU2wq", "owner": false},
+  {"username": "ALBY030", "password": "DcAJKLyyNX", "owner": false},
+  {"username": "ALBY031", "password": "G9bHQcyIBs", "owner": false},
+  {"username": "ALBY032", "password": "XkNeihrmzl", "owner": false},
+  {"username": "ALBY033", "password": "CgFIsMQVK4", "owner": false},
+  {"username": "ALBY034", "password": "DB3FcoeD0m", "owner": false},
+  {"username": "ALBY035", "password": "e41tQ1yzfI", "owner": false},
+  {"username": "ALBY036", "password": "34r39EFaHS", "owner": false},
+  {"username": "ALBY037", "password": "THs6PLaS0o", "owner": false},
+  {"username": "ALBY038", "password": "GjsXc2tBqU", "owner": false},
+  {"username": "ALBY039", "password": "OGjwCI18cV", "owner": false},
+  {"username": "ALBY040", "password": "QoiNo6XR8I", "owner": false},
+  {"username": "ALBY041", "password": "waACFWGG4N", "owner": false},
+  {"username": "ALBY042", "password": "KFyu2oLqWS", "owner": false},
+  {"username": "ALBY043", "password": "1oKzpRJo6t", "owner": false},
+  {"username": "ALBY044", "password": "2ZA4Vh3yZt", "owner": false},
+  {"username": "ALBY045", "password": "J0rXDLBmOq", "owner": false},
+  {"username": "ALBY046", "password": "jE1qtmF8i6", "owner": false},
+  {"username": "ALBY047", "password": "tE8CsI1TXq", "owner": false},
+  {"username": "ALBY048", "password": "hck8XZ3uUu", "owner": false},
+  {"username": "ALBY049", "password": "khwlTCwlo8", "owner": false},
+  {"username": "ALBY050", "password": "JF8v3m0axC", "owner": false},
+  {"username": "ALBY051", "password": "p9ae3CgHgl", "owner": false},
+  {"username": "ALBY052", "password": "hooh0ddxMk", "owner": false},
+  {"username": "ALBY053", "password": "4QFfUvfJFP", "owner": false},
+  {"username": "ALBY054", "password": "RwR124aKiG", "owner": false},
+  {"username": "ALBY055", "password": "kU6AcHz19c", "owner": false},
+  {"username": "ALBY056", "password": "tQkkrxwRIi", "owner": false},
+  {"username": "ALBY057", "password": "JEjidKT0at", "owner": false},
+  {"username": "ALBY058", "password": "GfDSoKeZjs", "owner": false},
+  {"username": "ALBY059", "password": "4yeA0jyI9f", "owner": false},
+  {"username": "ALBY060", "password": "ubqmXpCjWz", "owner": false},
+  {"username": "ALBY061", "password": "K3oRhT8rtI", "owner": false},
+  {"username": "ALBY062", "password": "WcQ4e0vdP5", "owner": false},
+  {"username": "ALBY063", "password": "mUX5Jari02", "owner": false},
+  {"username": "ALBY064", "password": "8YMvRklWtg", "owner": false},
+  {"username": "ALBY065", "password": "hz8uzqb3FD", "owner": false},
+  {"username": "ALBY066", "password": "v2z1OiB6Bo", "owner": false},
+  {"username": "ALBY067", "password": "j2RPxfVRL9", "owner": false},
+  {"username": "ALBY068", "password": "e1tfrWlKdO", "owner": false},
+  {"username": "ALBY069", "password": "Zu2HY5GNmG", "owner": false},
+  {"username": "ALBY070", "password": "nuCX9CdsDw", "owner": false},
+  {"username": "ALBY071", "password": "RocyW1RL6P", "owner": false},
+  {"username": "ALBY072", "password": "hoiabBQRP6", "owner": false},
+  {"username": "ALBY073", "password": "s7TOh4bUqk", "owner": false},
+  {"username": "ALBY074", "password": "CPsgk3fwG4", "owner": false},
+  {"username": "ALBY075", "password": "CEliYlwBWN", "owner": false},
+  {"username": "ALBY076", "password": "nvTsDowEPI", "owner": false},
+  {"username": "ALBY077", "password": "lcej8iYVYD", "owner": false},
+  {"username": "ALBY078", "password": "FveP3tOgq1", "owner": false},
+  {"username": "ALBY079", "password": "m0EcGqkDai", "owner": false},
+  {"username": "ALBY080", "password": "CKirMTMwSD", "owner": false},
+  {"username": "ALBY081", "password": "trvKWRyQ2i", "owner": false},
+  {"username": "ALBY082", "password": "HzwE49rrlY", "owner": false},
+  {"username": "ALBY083", "password": "7j3X22UTXG", "owner": false},
+  {"username": "ALBY084", "password": "iGWRqIlKjK", "owner": false},
+  {"username": "ALBY085", "password": "uGPX8U0a4L", "owner": false},
+  {"username": "ALBY086", "password": "aiEmfcaZsc", "owner": false},
+  {"username": "ALBY087", "password": "6pe1WL5VmM", "owner": false},
+  {"username": "ALBY088", "password": "yWNR8M0WzX", "owner": false},
+  {"username": "ALBY089", "password": "Gy7a1R7Tfb", "owner": false},
+  {"username": "ALBY090", "password": "bnKInB77nT", "owner": false},
+  {"username": "ALBY091", "password": "nddDYBqQxS", "owner": false},
+  {"username": "ALBY092", "password": "ZWs2jJpE8S", "owner": false},
+  {"username": "ALBY093", "password": "iBc1mf7lG8", "owner": false},
+  {"username": "ALBY094", "password": "aYtE5ZIvn4", "owner": false},
+  {"username": "ALBY095", "password": "RBntBq4h3J", "owner": false},
+  {"username": "ALBY096", "password": "KcJ3cpL430", "owner": false},
+  {"username": "ALBY097", "password": "gBfw3RCRas", "owner": false},
+  {"username": "ALBY098", "password": "0zLVJWoLz0", "owner": false},
+  {"username": "ALBY099", "password": "BeMXCjcEsF", "owner": false},
+  {"username": "ALBY100", "password": "Rf7neNlTuy", "owner": false}
+];
+
+const KEY = 'sfl_demo_v6';
+const SHARED_MS = 48 * 60 * 60 * 1000;
+const REGISTERED_MS = 24 * 60 * 60 * 1000;
+const MAX_REGISTRATIONS = 3;
+const MAX_BYPASS_PER_DAY = 3;
+
+const SVG_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+const SVG_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c6.5 0 10 7 10 7a18.45 18.45 0 0 1-3.16 4.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="2" y1="2" x2="22" y2="22"/></svg>';
+
+const $ = id => document.getElementById(id);
+
+function getDB() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return { users: [], registrations: 0, session: null, claims: {}, limits: {} };
+    const d = JSON.parse(raw);
+    d.users = d.users || [];
+    d.registrations = d.registrations || 0;
+    d.claims = d.claims || {};
+    d.session = d.session || null;
+    d.limits = d.limits || {};
+    return d;
+  } catch (e) {
+    return { users: [], registrations: 0, session: null, claims: {}, limits: {} };
+  }
+}
+function saveDB(db) { localStorage.setItem(KEY, JSON.stringify(db)); }
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function allUsers() {
+  const registered = getDB().users.map(u => Object.assign({}, u, { registered: true }));
+  return ACCOUNTS.concat(registered);
+}
+
+let current = null;
+let clockTimer = null;
+let limitTimer = null;
+
+function fmtDur(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = t % 60;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+function newToken() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return String(Math.random()).slice(2) + Date.now().toString(36);
+}
+
+function msg(t, cls) {
+  $('authMsg').className = 'status ' + (cls || '');
+  $('authMsg').textContent = t;
+}
+function showApp() {
+  $('loginView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+}
+function showLogin() {
+  $('appView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+   }
+  function getCurrentAccount() {
+  return current ? allUsers().find(a => a.username.toLowerCase() === current.username.toLowerCase()) : null;
+}
+
+function maskPassword(password) {
+  const p = String(password || '');
+  if (p.length <= 2) return p.charAt(0) + '*'.repeat(Math.max(0, p.length - 1));
+  return p.charAt(0) + '*'.repeat(p.length - 2) + p.charAt(p.length - 1);
+}
+
+function accountStatus(account) {
+  if (!account) return 'TIDAK DIKETAHUI';
+  if (account.owner) return 'OWNER-SELAMANYA';
+  if (account.registered) return 'SEMENTARA';
+  return 'FREE SEMENTARA';
+}
+
+function openAccountModal() {
+  if (!current) return;
+  $('accountInfo').classList.add('hidden');
+  $('accountOverlay').classList.remove('hidden');
+}
+
+function closeAccountModal() {
+  $('accountOverlay').classList.add('hidden');
+}
+
+function showAccountInfo() {
+  const account = getCurrentAccount();
+  if (!account) {
+    $('accountInfo').textContent = 'Informasi akun tidak tersedia.';
+  } else {
+    $('accountInfo').innerHTML =
+      '<div><strong>AKUN:</strong> ' + escapeHTML(account.username) + '</div>' +
+      '<div><strong>PASSWORD:</strong> ' + escapeHTML(maskPassword(account.password)) + '</div>' +
+      '<div><strong>STATUS:</strong> ' + escapeHTML(accountStatus(account)) + '</div>';
+  }
+  $('accountInfo').classList.remove('hidden');
+}
+
+function logout() {
+  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
+  if (limitTimer) { clearInterval(limitTimer); limitTimer = null; }
+  
+  const db = getDB();
+  if (current) {
+    if (db.claims[current.username]) {
+      db.claims[current.username].isLoggedIn = false;
+    }
+    db.session = null;
+  }
+  saveDB(db);
+  current = null;
+  $('userTag').textContent = '';
+  closeAccountModal();
+  showLogin();
+  $('loginPass').value = '';
+  msg('Berhasil keluar. Sisa waktu & kesempatan tetap berjalan.', 'success');
+}
+
+function updateTag() {
+  if (!current) return;
+  if (!current.expiresAt) {
+    $('userTag').innerHTML = '<strong>LOGIN: ' + escapeHTML(current.username) + '</strong><small>OWNER - Tanpa batas</small>';
+    return;
+  }
+  const left = current.expiresAt - Date.now();
+  if (left <= 0) { expireCurrent('Waktu akun habis. Silakan login ulang.'); return; }
+  $('userTag').innerHTML = '<strong>LOGIN: ' + escapeHTML(current.username) + '</strong><small>Sisa waktu: ' + fmtDur(left) + '</small>';
+}
+
+function startClock() {
+  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
+  updateTag();
+  if (current && current.expiresAt) clockTimer = setInterval(updateTag, 1000);
+}
+
+function expireCurrent(reason) {
+  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
+  if (limitTimer) { clearInterval(limitTimer); limitTimer = null; }
+  
+  const db = getDB();
+  if (current) {
+    if (db.claims[current.username]) {
+      db.claims[current.username].isLoggedIn = false;
+    }
+    db.session = null;
+  }
+  saveDB(db);
+  current = null;
+  $('userTag').textContent = '';
+  showLogin();
+  msg(reason, 'error');
+}
+
+function switchTab(which) {
+  const isLogin = which === 'login';
+  $('loginForm').classList.toggle('hidden', !isLogin);
+  $('registerForm').classList.toggle('hidden', isLogin);
+  $('loginTab').classList.toggle('active', isLogin);
+  $('registerTab').classList.toggle('active', !isLogin);
+  if (isLogin) msg('');
+}
+
+function updateBypassLimitUI() {
+  if (!current) return;
+  if (current.type === 'owner') {
+    $('limitInfo').style.display = 'none';
+    $('bypassBtn').textContent = 'Bypass';
+    $('bypassBtn').disabled = false;
+    $('bypassBtn').style.background = 'var(--accent)';
+    return;
+  }
+
+  const db = getDB();
+  let limits = db.limits[current.username];
+  const now = Date.now();
+
+  if (!limits || now >= limits.resetAt) {
+    limits = { count: MAX_BYPASS_PER_DAY, resetAt: now + 24 * 60 * 60 * 1000 };
+    db.limits[current.username] = limits;
+    saveDB(db);
+  }
+
+  $('limitInfo').style.display = 'block';
+  
+  if (limits.count > 0) {
+    $('limitInfo').innerHTML = 'Sisa kesempatan bypass hari ini: <b>' + limits.count + ' / ' + MAX_BYPASS_PER_DAY + '</b>';
+    $('bypassBtn').textContent = 'Bypass';
+    $('bypassBtn').disabled = false;
+    $('bypassBtn').style.background = 'var(--accent)';
+  } else {
+    $('limitInfo').innerHTML = '<span class="error">Kesempatan bypass habis!</span> Tunggu 24 jam.';
+    $('bypassBtn').disabled = true;
+    $('bypassBtn').style.background = 'var(--muted)';
+    
+    if (limitTimer) clearInterval(limitTimer);
+    limitTimer = setInterval(() => {
+      const left = limits.resetAt - Date.now();
+      if (left <= 0) {
+        clearInterval(limitTimer);
+        updateBypassLimitUI();
+        return;
+      }
+      $('bypassBtn').textContent = 'Tunggu ' + fmtDur(left);
+    }, 1000);
+  }
+}
+
+function login() {
+  const u = $('loginUser').value.trim();
+  const p = $('loginPass').value;
+  const account = allUsers().find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+  if (!account) { msg('Username atau password salah.', 'error'); return; }
+
+  const db = getDB();
+  const now = Date.now();
+  const token = newToken();
+
+  if (account.owner) {
+    db.session = { username: account.username, token, type: 'owner', expiresAt: null };
+    saveDB(db);
+    current = db.session;
+    msg('');
+    showApp();
+    startClock();
+    updateBypassLimitUI();
+    return;
+  }
+
+  if (account.registered) {
+    if (now >= account.expiresAt) {
+      msg('Masa berlaku akun sudah habis. Akun ini tidak bisa digunakan lagi.', 'error');
+      return;
+    }
+    const claim = db.claims[account.username];
+    if (claim && claim.isLoggedIn) {
+      msg('AKUN SEDANG DIPAKAI!<br>Silakan tunggu sampai pemilik sebelumnya logout.', 'error');
+      return;
+    }
+
+    db.claims[account.username] = { token, expiresAt: account.expiresAt, isLoggedIn: true };
+    db.session = { username: account.username, token, type: 'registered', expiresAt: account.expiresAt };
+    saveDB(db);
+    current = db.session;
+    msg('');
+    showApp();
+    startClock();
+    updateBypassLimitUI();
+    return;
+  }
+
+  const claim = db.claims[account.username];
+  if (claim && claim.isLoggedIn) {
+    msg('AKUN SEDANG DIPAKAI!<br>Silakan tunggu sampai pemilik sebelumnya logout.', 'error');
+    return;
+  }
+
+  let expiresAt;
+  if (claim && claim.expiresAt > now) {
+    expiresAt = claim.expiresAt;
+  } else {
+    expiresAt = now + SHARED_MS;
+  }
+
+  db.claims[account.username] = { token, expiresAt: expiresAt, isLoggedIn: true };
+  db.session = { username: account.username, token, type: 'shared', expiresAt: expiresAt };
+  saveDB(db);
+  
+  current = db.session;
+  msg('');
+  showApp();
+  startClock();
+  updateBypassLimitUI();
+}
+
+function register() {
+  const username = $('regUser').value.trim();
+  const password = $('regPass').value;
+  const db = getDB();
+  if (db.registrations >= MAX_REGISTRATIONS) { msg('Batas daftar sudah mencapai 3 kali.', 'error'); return; }
+  if (username.length < 3 || password.length < 6) { msg('Username minimal 3 karakter dan password minimal 6 karakter.', 'error'); return; }
+  if (allUsers().some(x => x.username.toLowerCase() === username.toLowerCase())) { msg('Username sudah digunakan.', 'error'); return; }
+  
+  const now = Date.now();
+  db.users.push({ username, password, createdAt: now, expiresAt: now + REGISTERED_MS });
+  db.registrations++;
+  saveDB(db);
+  
+  switchTab('login');
+  msg('Pendaftaran berhasil. Akun berlaku 24 jam sejak didaftarkan.', 'success');
+  $('loginUser').value = username;
+  $('loginPass').value = '';
+}
+
+function restore() {
+  const db = getDB();
+  const s = db.session;
+  if (!s) return;
+  const now = Date.now();
+
+  if (s.type === 'owner') {
+    current = s;
+    showApp();
+    startClock();
+    updateBypassLimitUI();
+    return;
+  }
+  
+  if (!s.expiresAt || now >= s.expiresAt) {
+    expireCurrent('Waktu sesi berakhir.');
+    return;
+  }
+
+  const claim = db.claims[s.username];
+  if (!claim || claim.token !== s.token) {
+    db.session = null;
+    saveDB(db);
+    return;
+  }
+
+  current = s;
+  showApp();
+  startClock();
+  updateBypassLimitUI();
+}
+
+function setupEye(inputId, btnId) {
+  const input = $(inputId);
+  const btn = $(btnId);
+  btn.innerHTML = SVG_EYE;
+  btn.addEventListener('click', () => {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+    btn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+    btn.innerHTML = show ? SVG_EYE_OFF : SVG_EYE;
+  });
+}
+
+let destination = '';
+let lastBypassedUrl = localStorage.getItem('sfl_last_bypassed_url') || '';
+let pendingSameUrl = false;
+
+function wireEvents() {
+  $('userTag').addEventListener('click', openAccountModal);
+  $('userTag').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAccountModal(); }
+  });
+  $('logoutBtn').onclick = logout;
+  $('accountInfoBtn').onclick = showAccountInfo;
+  $('closeAccountModal').onclick = closeAccountModal;
+  $('accountOverlay').addEventListener('click', e => {
+    if (e.target === $('accountOverlay')) closeAccountModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeAccountModal();
+  });
+  $('loginTab').onclick = () => switchTab('login');
+  $('registerTab').onclick = () => switchTab('register');
+  $('loginBtn').onclick = login;
+  $('regBtn').onclick = register;
+
+  $('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  $('regPass').addEventListener('keydown', e => { if (e.key === 'Enter') register(); });
+
+  $('sflInput').addEventListener('input', () => {
+    if (pendingSameUrl) {
+      pendingSameUrl = false;
+      updateBypassLimitUI();
+      $('result').innerHTML = '';
+    }
+  });
+
+  $('bypassBtn').onclick = async () => {
+    if (!current) return;
+    
+    const raw = $('sflInput').value.trim();
+
+    if (!raw) { $('result').textContent = 'Masukkan link SFL dulu.'; return; }
+    if (!/^https?:\/\//i.test(raw)) {
+      $('result').textContent = 'Link harus diawali http:// atau https://';
+      return;
+    }
+
+    if (current.type !== 'owner' && raw === lastBypassedUrl && !pendingSameUrl) {
+      pendingSameUrl = true;
+      $('result').innerHTML = '<div class="warning-box">INFORMASI!<br><br>Link SFL yang dimasukkan masih sama dengan sebelumnya.<br>Silakan ganti link terlebih dahulu, atau klik tombol di bawah untuk melanjutkan (kesempatan bypass akan berkurang).</div>';
+      $('bypassBtn').textContent = 'Lanjutkan (-1 Kesempatan)';
+      $('bypassBtn').style.background = '#ff9800';
+      return;
+    }
+
+    pendingSameUrl = false;
+    updateBypassLimitUI();
+    $('result').innerHTML = '';
+
+    if (current.type !== 'owner') {
+      const db = getDB();
+      const limits = db.limits[current.username];
+      if (!limits || limits.count <= 0) {
+        return; 
+      }
+      limits.count--;
+      saveDB(db);
+      updateBypassLimitUI();
+    }
+
+    localStorage.setItem('sfl_last_bypassed_url', raw);
+    lastBypassedUrl = raw;
+
+    let dots = 0;
+    $('result').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;"><span class="spinner"></span><span id="loadingMsg">Memproses.</span></div>';
+    const loadingInterval = setInterval(() => {
+      dots = (dots + 1) % 3;
+      const dotText = '.'.repeat(dots + 1);
+      const msgEl = document.getElementById('loadingMsg');
+      if (msgEl) msgEl.textContent = 'Memproses' + dotText;
+    }, 500);
+
+    let found = null;
+    
+    const apis = [
+      u => 'https://api.botcahx.eu.org/api/tools/bypass-sfl?url=' + encodeURIComponent(u),
+      u => 'https://api.siputzx.my.id/api/tools/bypass?url=' + encodeURIComponent(u),
+      u => 'https://api.vreden.my.id/api/bypass?url=' + encodeURIComponent(u),
+      u => 'https://api.zenkey.my.id/api/tools/bypass?url=' + encodeURIComponent(u)
+    ];
+
+    for (const api of apis) {
+      try {
+        const res = await fetch(api(raw));
+        if (!res.ok) continue;
+        const data = await res.json();
+        
+        const findMF = (obj) => {
+          if (typeof obj === 'string') {
+            if (obj.includes('mediafire.com')) return obj;
+          }
+          if (Array.isArray(obj)) {
+            for (const i of obj) { const f = findMF(i); if (f) return f; }
+          }
+          if (typeof obj === 'object' && obj !== null) {
+            for (const k in obj) { const f = findMF(obj[k]); if (f) return f; }
+          }
+          return null;
+        };
+
+        const result = findMF(data);
+        if (result) {
+          found = result;
+          break;
+        }
+      } catch (e) {
+        console.log('API error', e);
+      }
+    }
+
+    clearInterval(loadingInterval);
+
+    if (found) {
+      destination = found;
+      $('result').innerHTML = '<span class="success">Link MediaFire ditemukan:</span><br>' + escapeHTML(destination);
+      if ($('autoOpen').checked) {
+        window.open(destination, '_blank', 'noopener,noreferrer');
+        $('result').innerHTML += '<br>Mencoba membuka tab baru...';
+      } else {
+        $('manualActions').classList.remove('hidden');
+        $('openBtn').textContent = 'Buka Link MediaFire';
+        $('copyBtn').textContent = 'Salin Link MediaFire';
+        $('copyBtn').style.display = 'block';
+        $('openBtn').onclick = () => window.open(destination, '_blank', 'noopener,noreferrer');
+      }
+    } else {
+      $('result').innerHTML =
+        'Link tujuan belum berhasil ditemukan.<br><br>' +
+        'API publik sedang sibuk atau link SFL ini diproteksi ketat. Kamu bisa coba klik Bypass sekali lagi.';
+      destination = '';
+      $('manualActions').classList.remove('hidden');
+      $('openBtn').textContent = 'Buka link SFL manual';
+      $('openBtn').onclick = () => window.open(raw, '_blank', 'noopener,noreferrer');
+      $('copyBtn').style.display = 'none';
+    }
+  };
+
+  $('copyBtn').onclick = async () => {
+    if (!destination) return;
+    try {
+      await navigator.clipboard.writeText(destination);
+      $('result').innerHTML = '<span class="success">Berhasil menyalin Link MediaFire!</span><br>' + escapeHTML(destination);
+    } catch (e) {
+      $('result').textContent = 'Gagal menyalin. Silakan salin manual.';
+    }
+  };
+}
+
+setupEye('loginPass', 'loginEye');
+setupEye('regPass', 'regEye');
+wireEvents();
+restore();
+</script>
+</body>
+</html>
