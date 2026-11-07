@@ -62,6 +62,24 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 @keyframes spin { to { transform: rotate(360deg); } }
 .warning-box { background: rgba(255, 152, 0, 0.15); border: 1px solid #ff9800; color: #ff9800; padding: 12px; border-radius: 12px; margin-bottom: 12px; font-weight: bold; line-height: 1.5; text-align: center; }
 </style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAkQwUbM7JiJxOdDW_I4DNeQbSly5drkdM",
+  authDomain: "sfl-bypass-alby.firebaseapp.com",
+  projectId: "sfl-bypass-alby",
+  storageBucket: "sfl-bypass-alby.firebasestorage.app",
+  messagingSenderId: "1023335456504",
+  appId: "1:1023335456504:web:6b81fe08a986221377a50d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+</script>
+
 </head>
 <body>
 <main class="wrap">
@@ -104,7 +122,6 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 
     <div id="authMsg" class="status" role="status"></div>
   </div>
-  <p class="small">Catatan: sistem akun, klaim akun, dan sesi hanya tersimpan di browser/perangkat ini.</p>
 </section>
 
 <section id="appView" class="hidden">
@@ -125,10 +142,6 @@ button:disabled{opacity:0.6;cursor:not-allowed}
     </div>
     <div id="serverTip" class="server-tip"></div>
   </div>
-  <div class="step"><div class="num">01</div><p>Salin link SFL yang ingin dibuka.</p></div>
-  <div class="step"><div class="num">02</div><p>Tempel link ke kolom di atas, lalu tekan tombol <b>Bypass</b>.</p></div>
-  <div class="step"><div class="num">03</div><p>Jika tujuan ditemukan, link akan dibuka otomatis. Matikan centang untuk memilih membuka atau menyalin link secara manual.</p></div>
-  <div class="step"><div class="num">04</div><p>Jika link tujuan tidak terdeteksi, berarti alamatnya benar-benar tersembunyi di server SFL. Alat ini tidak menerobos CAPTCHA, login, atau proteksi server.</p></div>
 </section>
 </main>
 
@@ -143,6 +156,8 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 </div>
 
 <script>
+
+
   const ACCOUNTS = [
   {"username": "OWNER ALBY", "password": "OKEGAS", "owner": true},
   {"username": "ALBY001", "password": "ThnkVMNNGF", "owner": false},
@@ -247,7 +262,6 @@ button:disabled{opacity:0.6;cursor:not-allowed}
   {"username": "ALBY100", "password": "Rf7neNlTuy", "owner": false}
 ];
 
-const KEY = 'sfl_demo_v6';
 const SHARED_MS = 48 * 60 * 60 * 1000;
 const REGISTERED_MS = 24 * 60 * 60 * 1000;
 const MAX_REGISTRATIONS = 3;
@@ -258,35 +272,15 @@ const SVG_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 
 const $ = id => document.getElementById(id);
 
-function getDB() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return { users: [], registrations: 0, session: null, claims: {}, limits: {} };
-    const d = JSON.parse(raw);
-    d.users = d.users || [];
-    d.registrations = d.registrations || 0;
-    d.claims = d.claims || {};
-    d.session = d.session || null;
-    d.limits = d.limits || {};
-    return d;
-  } catch (e) {
-    return { users: [], registrations: 0, session: null, claims: {}, limits: {} };
+// Ambil ID unik perangkat ini
+function getDeviceToken() {
+  let token = localStorage.getItem('device_token');
+  if (!token) {
+    token = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now().toString(36);
+    localStorage.setItem('device_token', token);
   }
+  return token;
 }
-function saveDB(db) { localStorage.setItem(KEY, JSON.stringify(db)); }
-
-function escapeHTML(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function allUsers() {
-  const registered = getDB().users.map(u => Object.assign({}, u, { registered: true }));
-  return ACCOUNTS.concat(registered);
-}
-
-let current = null;
-let clockTimer = null;
-let limitTimer = null;
 
 function fmtDur(ms) {
   const t = Math.max(0, Math.floor(ms / 1000));
@@ -295,14 +289,14 @@ function fmtDur(ms) {
   const s = t % 60;
   return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
-function newToken() {
-  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-  return String(Math.random()).slice(2) + Date.now().toString(36);
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function msg(t, cls) {
   $('authMsg').className = 'status ' + (cls || '');
-  $('authMsg').textContent = t;
+  $('authMsg').innerHTML = t;
 }
 function showApp() {
   $('loginView').classList.add('hidden');
@@ -311,65 +305,36 @@ function showApp() {
 function showLogin() {
   $('appView').classList.add('hidden');
   $('loginView').classList.remove('hidden');
-   }
-  function getCurrentAccount() {
-  return current ? allUsers().find(a => a.username.toLowerCase() === current.username.toLowerCase()) : null;
 }
 
-function maskPassword(password) {
-  const p = String(password || '');
-  if (p.length <= 2) return p.charAt(0) + '*'.repeat(Math.max(0, p.length - 1));
-  return p.charAt(0) + '*'.repeat(p.length - 2) + p.charAt(p.length - 1);
-}
+let current = null;
+let clockTimer = null;
+let limitTimer = null;
 
-function accountStatus(account) {
-  if (!account) return 'TIDAK DIKETAHUI';
-  if (account.owner) return 'OWNER-SELAMANYA';
-  if (account.registered) return 'SEMENTARA';
-  return 'FREE SEMENTARA';
-}
 
-function openAccountModal() {
-  if (!current) return;
-  $('accountInfo').classList.add('hidden');
-  $('accountOverlay').classList.remove('hidden');
-}
-
-function closeAccountModal() {
-  $('accountOverlay').classList.add('hidden');
-}
-
-function showAccountInfo() {
-  const account = getCurrentAccount();
-  if (!account) {
-    $('accountInfo').textContent = 'Informasi akun tidak tersedia.';
-  } else {
-    $('accountInfo').innerHTML =
-      '<div><strong>AKUN:</strong> ' + escapeHTML(account.username) + '</div>' +
-      '<div><strong>PASSWORD:</strong> ' + escapeHTML(maskPassword(account.password)) + '</div>' +
-      '<div><strong>STATUS:</strong> ' + escapeHTML(accountStatus(account)) + '</div>';
-  }
-  $('accountInfo').classList.remove('hidden');
-}
-
-function logout() {
-  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
-  if (limitTimer) { clearInterval(limitTimer); limitTimer = null; }
-  
-  const db = getDB();
-  if (current) {
-    if (db.claims[current.username]) {
-      db.claims[current.username].isLoggedIn = false;
+  // LOAD DATA DARI FIREBASE
+async function loadAccountData(username) {
+  try {
+    const docRef = doc(db, "users", username);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
     }
-    db.session = null;
+    return null;
+  } catch (e) {
+    console.error("Firebase Error:", e);
+    return null;
   }
-  saveDB(db);
-  current = null;
-  $('userTag').textContent = '';
-  closeAccountModal();
-  showLogin();
-  $('loginPass').value = '';
-  msg('Berhasil keluar. Sisa waktu & kesempatan tetap berjalan.', 'success');
+}
+
+// SIMPAN DATA KE FIREBASE
+async function saveAccountData(username, data) {
+  try {
+    const docRef = doc(db, "users", username);
+    await setDoc(docRef, data, { merge: true });
+  } catch (e) {
+    console.error("Firebase Error:", e);
+  }
 }
 
 function updateTag() {
@@ -389,22 +354,52 @@ function startClock() {
   if (current && current.expiresAt) clockTimer = setInterval(updateTag, 1000);
 }
 
-function expireCurrent(reason) {
+async function expireCurrent(reason) {
   if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
   if (limitTimer) { clearInterval(limitTimer); limitTimer = null; }
   
-  const db = getDB();
   if (current) {
-    if (db.claims[current.username]) {
-      db.claims[current.username].isLoggedIn = false;
-    }
-    db.session = null;
+    await saveAccountData(current.username, { isLoggedIn: false });
+    current = null;
   }
-  saveDB(db);
-  current = null;
+  localStorage.removeItem('sfl_session');
   $('userTag').textContent = '';
   showLogin();
   msg(reason, 'error');
+}
+
+function openAccountModal() {
+  if (!current) return;
+  $('accountInfo').classList.add('hidden');
+  $('accountOverlay').classList.remove('hidden');
+}
+
+function closeAccountModal() {
+  $('accountOverlay').classList.add('hidden');
+}
+
+function showAccountInfo() {
+  if (!current) return;
+  $('accountInfo').innerHTML =
+    '<div><strong>AKUN:</strong> ' + escapeHTML(current.username) + '</div>' +
+    '<div><strong>STATUS:</strong> ' + (current.type === 'owner' ? 'OWNER' : 'REGULER') + '</div>';
+  $('accountInfo').classList.remove('hidden');
+}
+
+async function logout() {
+  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
+  if (limitTimer) { clearInterval(limitTimer); limitTimer = null; }
+  
+  if (current) {
+    await saveAccountData(current.username, { isLoggedIn: false });
+    current = null;
+  }
+  localStorage.removeItem('sfl_session');
+  $('userTag').textContent = '';
+  closeAccountModal();
+  showLogin();
+  $('loginPass').value = '';
+  msg('Berhasil keluar. Sisa waktu & kesempatan tetap berjalan di server.', 'success');
 }
 
 function switchTab(which) {
@@ -416,7 +411,7 @@ function switchTab(which) {
   if (isLogin) msg('');
 }
 
-function updateBypassLimitUI() {
+async function updateBypassLimitUI() {
   if (!current) return;
   if (current.type === 'owner') {
     $('limitInfo').style.display = 'none';
@@ -426,14 +421,16 @@ function updateBypassLimitUI() {
     return;
   }
 
-  const db = getDB();
-  let limits = db.limits[current.username];
-  const now = Date.now();
+  const dbData = await loadAccountData(current.username);
+  if (!dbData) return;
 
+  const now = Date.now();
+  let limits = dbData.limits;
+
+  // Jika belum ada limit, atau resetAt sudah terlewat, reset jatah ke 3
   if (!limits || now >= limits.resetAt) {
     limits = { count: MAX_BYPASS_PER_DAY, resetAt: now + 24 * 60 * 60 * 1000 };
-    db.limits[current.username] = limits;
-    saveDB(db);
+    await saveAccountData(current.username, { limits: limits });
   }
 
   $('limitInfo').style.display = 'block';
@@ -461,20 +458,21 @@ function updateBypassLimitUI() {
   }
 }
 
-function login() {
+async function login() {
   const u = $('loginUser').value.trim();
   const p = $('loginPass').value;
-  const account = allUsers().find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+  const account = ACCOUNTS.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+  
   if (!account) { msg('Username atau password salah.', 'error'); return; }
 
-  const db = getDB();
+  msg('Memeriksa server...', 'success');
+  const token = getDeviceToken();
   const now = Date.now();
-  const token = newToken();
 
+  // ===== OWNER =====
   if (account.owner) {
-    db.session = { username: account.username, token, type: 'owner', expiresAt: null };
-    saveDB(db);
-    current = db.session;
+    current = { username: account.username, type: 'owner', expiresAt: null, token: token };
+    localStorage.setItem('sfl_session', JSON.stringify(current));
     msg('');
     showApp();
     startClock();
@@ -482,46 +480,43 @@ function login() {
     return;
   }
 
-  if (account.registered) {
-    if (now >= account.expiresAt) {
-      msg('Masa berlaku akun sudah habis. Akun ini tidak bisa digunakan lagi.', 'error');
-      return;
-    }
-    const claim = db.claims[account.username];
-    if (claim && claim.isLoggedIn) {
-      msg('AKUN SEDANG DIPAKAI!<br>Silakan tunggu sampai pemilik sebelumnya logout.', 'error');
-      return;
-    }
-
-    db.claims[account.username] = { token, expiresAt: account.expiresAt, isLoggedIn: true };
-    db.session = { username: account.username, token, type: 'registered', expiresAt: account.expiresAt };
-    saveDB(db);
-    current = db.session;
-    msg('');
-    showApp();
-    startClock();
-    updateBypassLimitUI();
-    return;
-  }
-
-  const claim = db.claims[account.username];
-  if (claim && claim.isLoggedIn) {
-    msg('AKUN SEDANG DIPAKAI!<br>Silakan tunggu sampai pemilik sebelumnya logout.', 'error');
-    return;
-  }
-
-  let expiresAt;
-  if (claim && claim.expiresAt > now) {
-    expiresAt = claim.expiresAt;
-  } else {
-    expiresAt = now + SHARED_MS;
-  }
-
-  db.claims[account.username] = { token, expiresAt: expiresAt, isLoggedIn: true };
-  db.session = { username: account.username, token, type: 'shared', expiresAt: expiresAt };
-  saveDB(db);
+  // ===== AKUN ONLINE =====
+  const dbData = await loadAccountData(account.username);
   
-  current = db.session;
+  // Cek apakah akun sedang dipakai di HP lain
+  if (dbData && dbData.isLoggedIn && dbData.deviceToken !== token) {
+    msg('AKUN SEDANG DIPAKAI!<br>Orang lain sedang login dengan akun ini. Silakan tunggu sampai mereka logout.', 'error');
+    return;
+  }
+
+  // ===== AKUN DAFTAR =====
+  if (account.registered) {
+    let expiresAt = dbData ? dbData.expiresAt : now + REGISTERED_MS;
+    if (now >= expiresAt) {
+      msg('Masa berlaku akun sudah habis (24 jam).', 'error');
+      return;
+    }
+    await saveAccountData(account.username, { isLoggedIn: true, deviceToken: token, expiresAt: expiresAt });
+    current = { username: account.username, type: 'registered', expiresAt: expiresAt, token: token };
+    localStorage.setItem('sfl_session', JSON.stringify(current));
+    msg('');
+    showApp();
+    startClock();
+    updateBypassLimitUI();
+    return;
+  }
+
+  // ===== AKUN 100 ALBY =====
+  let expiresAt;
+  if (dbData && dbData.expiresAt > now) {
+    expiresAt = dbData.expiresAt; // Lanjutkan sisa waktu
+  } else {
+    expiresAt = now + SHARED_MS; // Sesi baru
+  }
+
+  await saveAccountData(account.username, { isLoggedIn: true, deviceToken: token, expiresAt: expiresAt });
+  current = { username: account.username, type: 'shared', expiresAt: expiresAt, token: token };
+  localStorage.setItem('sfl_session', JSON.stringify(current));
   msg('');
   showApp();
   startClock();
@@ -529,54 +524,25 @@ function login() {
 }
 
 function register() {
-  const username = $('regUser').value.trim();
-  const password = $('regPass').value;
-  const db = getDB();
-  if (db.registrations >= MAX_REGISTRATIONS) { msg('Batas daftar sudah mencapai 3 kali.', 'error'); return; }
-  if (username.length < 3 || password.length < 6) { msg('Username minimal 3 karakter dan password minimal 6 karakter.', 'error'); return; }
-  if (allUsers().some(x => x.username.toLowerCase() === username.toLowerCase())) { msg('Username sudah digunakan.', 'error'); return; }
-  
-  const now = Date.now();
-  db.users.push({ username, password, createdAt: now, expiresAt: now + REGISTERED_MS });
-  db.registrations++;
-  saveDB(db);
-  
-  switchTab('login');
-  msg('Pendaftaran berhasil. Akun berlaku 24 jam sejak didaftarkan.', 'success');
-  $('loginUser').value = username;
-  $('loginPass').value = '';
+  // Fitur daftar dimatikan sementara untuk versi online
+  msg('Pendaftaran akun baru dinonaktifkan di versi online ini.', 'error');
 }
 
-function restore() {
-  const db = getDB();
-  const s = db.session;
+async function restore() {
+  const s = localStorage.getItem('sfl_session');
   if (!s) return;
+  
+  current = JSON.parse(s);
   const now = Date.now();
 
-  if (s.type === 'owner') {
-    current = s;
-    showApp();
-    startClock();
-    updateBypassLimitUI();
-    return;
-  }
-  
-  if (!s.expiresAt || now >= s.expiresAt) {
+  if (current.type !== 'owner' && current.expiresAt && now >= current.expiresAt) {
     expireCurrent('Waktu sesi berakhir.');
     return;
   }
 
-  const claim = db.claims[s.username];
-  if (!claim || claim.token !== s.token) {
-    db.session = null;
-    saveDB(db);
-    return;
-  }
-
-  current = s;
   showApp();
   startClock();
-  updateBypassLimitUI();
+  await updateBypassLimitUI();
 }
 
 function setupEye(inputId, btnId) {
@@ -587,7 +553,6 @@ function setupEye(inputId, btnId) {
     const show = input.type === 'password';
     input.type = show ? 'text' : 'password';
     btn.setAttribute('aria-pressed', show ? 'true' : 'false');
-    btn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
     btn.innerHTML = show ? SVG_EYE_OFF : SVG_EYE;
   });
 }
@@ -598,26 +563,17 @@ let pendingSameUrl = false;
 
 function wireEvents() {
   $('userTag').addEventListener('click', openAccountModal);
-  $('userTag').addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAccountModal(); }
-  });
   $('logoutBtn').onclick = logout;
   $('accountInfoBtn').onclick = showAccountInfo;
   $('closeAccountModal').onclick = closeAccountModal;
   $('accountOverlay').addEventListener('click', e => {
     if (e.target === $('accountOverlay')) closeAccountModal();
   });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeAccountModal();
-  });
+  
   $('loginTab').onclick = () => switchTab('login');
   $('registerTab').onclick = () => switchTab('register');
   $('loginBtn').onclick = login;
   $('regBtn').onclick = register;
-
-  $('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
-  $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
-  $('regPass').addEventListener('keydown', e => { if (e.key === 'Enter') register(); });
 
   $('sflInput').addEventListener('input', () => {
     if (pendingSameUrl) {
@@ -647,18 +603,20 @@ function wireEvents() {
     }
 
     pendingSameUrl = false;
-    updateBypassLimitUI();
+    await updateBypassLimitUI();
     $('result').innerHTML = '';
 
+    // POTONG LIMIT DI FIREBASE
     if (current.type !== 'owner') {
-      const db = getDB();
-      const limits = db.limits[current.username];
-      if (!limits || limits.count <= 0) {
-        return; 
+      const dbData = await loadAccountData(current.username);
+      if (dbData && dbData.limits && dbData.limits.count > 0) {
+        let newLimits = dbData.limits;
+        newLimits.count--;
+        await saveAccountData(current.username, { limits: newLimits });
+        await updateBypassLimitUI();
+      } else {
+        return;
       }
-      limits.count--;
-      saveDB(db);
-      updateBypassLimitUI();
     }
 
     localStorage.setItem('sfl_last_bypassed_url', raw);
@@ -674,7 +632,6 @@ function wireEvents() {
     }, 500);
 
     let found = null;
-    
     const apis = [
       u => 'https://api.botcahx.eu.org/api/tools/bypass-sfl?url=' + encodeURIComponent(u),
       u => 'https://api.siputzx.my.id/api/tools/bypass?url=' + encodeURIComponent(u),
@@ -706,9 +663,7 @@ function wireEvents() {
           found = result;
           break;
         }
-      } catch (e) {
-        console.log('API error', e);
-      }
+      } catch (e) {}
     }
 
     clearInterval(loadingInterval);
@@ -727,9 +682,7 @@ function wireEvents() {
         $('openBtn').onclick = () => window.open(destination, '_blank', 'noopener,noreferrer');
       }
     } else {
-      $('result').innerHTML =
-        'Link tujuan belum berhasil ditemukan.<br><br>' +
-        'API publik sedang sibuk atau link SFL ini diproteksi ketat. Kamu bisa coba klik Bypass sekali lagi.';
+      $('result').innerHTML = 'Link tujuan belum berhasil ditemukan.<br><br>API publik sedang sibuk. Coba klik Bypass sekali lagi.';
       destination = '';
       $('manualActions').classList.remove('hidden');
       $('openBtn').textContent = 'Buka link SFL manual';
@@ -750,7 +703,6 @@ function wireEvents() {
 }
 
 setupEye('loginPass', 'loginEye');
-setupEye('regPass', 'regEye');
 wireEvents();
 restore();
 </script>
