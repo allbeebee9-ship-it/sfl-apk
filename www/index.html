@@ -4,707 +4,333 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>SFL Bypass</title>
+<title>JADWALMU</title>
 <style>
-:root{color-scheme:light dark;--bg:#fff;--panel:#fff;--ink:#101114;--muted:#687080;--line:#dedfe4;--accent:#55c8f5;--accent2:#9be5ff;--shadow:0 12px 34px rgba(0,0,0,.07)}
-@media(prefers-color-scheme:dark){:root{--bg:#000;--panel:#050505;--ink:#f6f7fb;--muted:#aab1c0;--line:#24262b;--shadow:0 12px 34px rgba(0,0,0,.35)}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-.wrap{width:min(680px,100%);margin:auto;padding:34px 20px 60px}
-.pill{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:30px;padding:9px 17px;color:var(--accent);font-weight:700;letter-spacing:2px;font-size:13px}
-.dot{width:10px;height:10px;background:var(--accent);border-radius:50%;box-shadow:0 0 14px var(--accent)}
-h1{font-size:clamp(32px,7vw,54px);line-height:1.12;letter-spacing:-1.8px;margin:34px 0 24px}
-h1 span{color:var(--accent)}
-.intro{font-size:clamp(16px,4vw,21px);line-height:1.65;color:var(--muted);margin-bottom:42px}
-.panel,.step{border:1px solid var(--line);border-radius:28px;background:var(--panel);padding:28px;margin-bottom:22px;box-shadow:var(--shadow)}
-label{display:block;color:var(--muted);margin:0 0 10px;font-size:15px}
-input{width:100%;background:transparent;color:var(--ink);border:2px solid var(--accent);border-radius:19px;padding:18px 20px;font-size:17px;outline:none;margin-bottom:16px}
-input:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
-button{border:0;border-radius:18px;padding:16px 18px;font-size:17px;font-weight:750;cursor:pointer;background:var(--accent);color:#06131b;width:100%;margin:5px 0}
-button.secondary{background:transparent;color:var(--ink);border:1px solid var(--line)}
-button:active{transform:scale(.99)}
-button:disabled{opacity:0.6;cursor:not-allowed}
-.check{display:flex;align-items:center;gap:12px;margin:16px 0 0;color:var(--muted);font-size:16px}
-.check input{width:22px;height:22px;margin:0;accent-color:var(--accent)}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-.actions button{font-size:14px;padding:15px 8px}
-.hidden{display:none!important}
-.status{margin-top:14px;color:var(--muted);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
-.step{border-radius:22px;padding:22px}
-.num{color:var(--accent);font-weight:800;font-size:17px;margin-bottom:10px}
-.step p{margin:0;color:var(--muted);line-height:1.6}
-.tabs{display:flex;gap:8px;margin-bottom:18px}
-.tabs button{width:50%;background:transparent;border:1px solid var(--line);color:var(--muted)}
-.tabs button.active{background:var(--accent);color:#06131b;border-color:var(--accent)}
-.small{font-size:13px;color:var(--muted);line-height:1.55}
-.toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px}
-.toprow button{width:auto;margin:0;padding:10px 14px;font-size:13px}
-.user{font-size:13px;color:var(--muted);text-align:right;line-height:1.5;cursor:pointer;padding:8px 10px;border:1px solid var(--line);border-radius:14px}
-.user strong{display:block;color:var(--ink)}
-.user small{display:block;color:var(--accent);font-size:12px;font-variant-numeric:tabular-nums}
-.error{color:#e35d68}
-.success{color:#179b69}
-.pw-wrap{position:relative;margin-bottom:16px}
-.pw-wrap input{margin-bottom:0;padding-right:58px}
-.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;margin:0;padding:0;background:transparent;border:0;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer}
-.eye:hover{color:var(--accent)}
-.eye:active{transform:translateY(-50%) scale(.96)}
-.eye svg{width:22px;height:22px;display:block;pointer-events:none}
-.server-tip{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
-.account-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.58);backdrop-filter:blur(5px)}
-.account-modal{width:min(420px,100%);max-height:min(80vh,620px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
-.account-modal h2{margin:0 0 18px;font-size:23px}
-.account-info{border:1px solid var(--line);border-radius:16px;padding:15px;margin:14px 0 18px;line-height:1.8;overflow-wrap:anywhere}
-.account-info strong{color:var(--accent)}
-.account-modal .close-modal{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.account-modal button{margin-top:9px}
-.spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s ease-in-out infinite; margin-right: 10px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.warning-box { background: rgba(255, 152, 0, 0.15); border: 1px solid #ff9800; color: #ff9800; padding: 12px; border-radius: 12px; margin-bottom: 12px; font-weight: bold; line-height: 1.5; text-align: center; }
+:root {
+  --bg-light: #ffffff; --bg-dark: #121212;
+  --panel-light: #f5f5f5; --panel-dark: #1e1e1e;
+  --text-light: #333333; --text-dark: #ffffff;
+  --primary: #ff9800;
+  --border-light: #e0e0e0; --border-dark: #333333;
+  --bg: var(--bg-light); --panel: var(--panel-light); --text: var(--text-light); --border: var(--border-light); --input-bg: #ffffff;
+}
+body.dark-mode {
+  --bg: var(--bg-dark); --panel: var(--panel-dark); --text: var(--text-dark); --border: var(--border-dark); --input-bg: #2a2a2a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+body { background-color: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; min-height: 100vh; padding-bottom: 80px; overflow-x: hidden; }
+.hidden { display: none !important; }
+
+#authView { display: flex; flex-direction: column; justify-content: center; height: 100vh; padding: 30px; }
+.logo-title { text-align: center; margin-bottom: 30px; font-size: 28px; font-weight: 900; letter-spacing: 2px; color: var(--primary); }
+.tabs { display: flex; background: var(--panel); border-radius: 15px; padding: 5px; margin-bottom: 20px; }
+.tabs button { flex: 1; background: transparent; border: 0; color: var(--text); padding: 12px; font-weight: bold; border-radius: 10px; cursor: pointer; }
+.tabs button.active { background: var(--primary); color: #fff; }
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-size: 12px; margin-bottom: 5px; margin-left: 5px; opacity: 0.8; }
+input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="time"] { width: 100%; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 15px; border-radius: 12px; font-size: 15px; outline: none; }
+input:focus { border-color: var(--primary); }
+.btn-primary { width: 100%; background: var(--primary); color: #fff; border: 0; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+.btn-secondary { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 12px; border-radius: 12px; width: 100%; margin-top: 10px; font-weight: bold; cursor: pointer; }
+
+.app-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+.app-logo { width: 40px; height: 40px; }
+.app-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+
+.view-section { padding: 20px; display: none; }
+.view-section.active { display: block; }
+
+.calendar-container { background: var(--panel); padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+.cal-day { font-size: 12px; opacity: 0.5; margin-bottom: 5px; }
+.cal-date { padding: 10px 0; border-radius: 10px; font-size: 14px; }
+.cal-date.today { border: 1px solid var(--primary); }
+
+.schedule-card { background: var(--panel); padding: 15px; border-radius: 15px; margin-bottom: 15px; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+.schedule-info h4 { font-size: 16px; margin-bottom: 5px; }
+.schedule-info p { font-size: 12px; opacity: 0.7; }
+.countdown { background: rgba(255, 152, 0, 0.1); color: var(--primary); padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; text-align: center; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+.nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text); opacity: 0.5; font-size: 10px; font-weight: bold; cursor: pointer; }
+.nav-item.active { opacity: 1; color: var(--primary); }
+.nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); }
+.modal-content { background: var(--panel); width: 100%; max-width: 400px; border-radius: 25px; padding: 25px; border: 1px solid var(--border); }
+.modal-content h3 { margin-bottom: 20px; text-align: center; }
+.setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(22px); }
+.profile-header { text-align: center; padding: 20px 0; }
+.profile-pic { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); background: #ddd; margin-bottom: 10px; }
 </style>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAkQwUbM7JiJxOdDW_I4DNeQbSly5drkdM",
-  authDomain: "sfl-bypass-alby.firebaseapp.com",
-  projectId: "sfl-bypass-alby",
-  storageBucket: "sfl-bypass-alby.firebasestorage.app",
-  messagingSenderId: "1023335456504",
-  appId: "1:1023335456504:web:6b81fe08a986221377a50d"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-</script>
-
 </head>
 <body>
-<main class="wrap">
-<div class="toprow">
-  <div class="pill"><i class="dot"></i>SFL BYPASS</div>
-  <div id="userTag" class="user" role="button" tabindex="0" aria-label="Buka pengaturan akun"></div>
-</div>
-
-<section id="loginView">
-  <h1>Masuk dulu,<br><span>baru lanjut.</span></h1>
-  <p class="intro">Login untuk menggunakan alat pembaca tujuan link SFL.</p>
-  <div class="panel">
-    <div class="tabs">
-      <button id="loginTab" class="active" type="button">Masuk</button>
-      <button id="registerTab" type="button">Daftar</button>
-    </div>
-
-    <div id="loginForm">
-      <label>Username</label>
-      <input id="loginUser" autocomplete="username" placeholder="Masukkan username">
-      <label>Password</label>
-      <div class="pw-wrap">
-        <input id="loginPass" type="password" autocomplete="current-password" placeholder="Masukkan password">
-        <button type="button" class="eye" id="loginEye" aria-label="Tampilkan password" aria-pressed="false"></button>
-      </div>
-      <button id="loginBtn">Masuk</button>
-    </div>
-
-    <div id="registerForm" class="hidden">
-      <label>Buat username</label>
-      <input id="regUser" placeholder="Username baru">
-      <label>Buat password</label>
-      <div class="pw-wrap">
-        <input id="regPass" type="password" placeholder="Minimal 6 karakter">
-        <button type="button" class="eye" id="regEye" aria-label="Tampilkan password" aria-pressed="false"></button>
-      </div>
-      <button id="regBtn">Daftar akun</button>
-      <p class="small">Akun daftar berlaku 24 jam (1 hari) sejak didaftarkan. Setelah habis akun tidak bisa dipakai lagi. Maksimal 3 pendaftaran pada browser ini.</p>
-    </div>
-
-    <div id="authMsg" class="status" role="status"></div>
-  </div>
-</section>
-
-<section id="appView" class="hidden">
-  <h1>Lewati link <span>SFL,</span><br>langsung ke tujuan.</h1>
-  <p class="intro">Tempel link SFL di bawah. Alat ini memanggil server untuk membaca alamat tujuan yang tersembunyi.</p>
-  <div class="panel">
-    <label for="sflInput">Link SFL</label>
-    <input id="sflInput" type="url" placeholder="https://sfl.gl/xxxxxx">
-    
-    <div id="limitInfo" class="status small" style="margin-bottom: 10px; color: var(--accent); font-weight: bold;"></div>
-    
-    <button id="bypassBtn">Bypass</button>
-    <label class="check"><input id="autoOpen" type="checkbox" checked>Otomatis buka link tujuan</label>
-    <div id="result" class="status" aria-live="polite"></div>
-    <div id="manualActions" class="actions hidden">
-      <button class="secondary" id="openBtn">Buka link</button>
-      <button class="secondary" id="copyBtn">Salin link utama</button>
-    </div>
-    <div id="serverTip" class="server-tip"></div>
-  </div>
-</section>
-</main>
-
-<div id="accountOverlay" class="account-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
-  <div class="account-modal">
-    <h2 id="accountModalTitle">Pengaturan Akun</h2>
-    <button id="logoutBtn" type="button">LOG OUT</button>
-    <button id="accountInfoBtn" type="button" class="secondary">INFORMASI</button>
-    <div id="accountInfo" class="account-info hidden" aria-live="polite"></div>
-    <button id="closeAccountModal" type="button" class="close-modal">× KELUAR</button>
+  <div id="notifPermission" class="modal-overlay hidden">
+  <div class="modal-content" style="text-align:center;">
+    <h3>Izinkan Notifikasi</h3>
+    <p style="font-size:14px; margin-bottom:20px; opacity:0.8;">JADWALMU butuh izin notifikasi untuk mengingatkan jadwal kamu.</p>
+    <button class="btn-primary" onclick="requestNotif()">IZINKAN</button>
   </div>
 </div>
 
+<div id="authView">
+  <div class="logo-title">JADWALMU</div>
+  <div class="tabs">
+    <button id="tabLogin" class="active">Masuk</button>
+    <button id="tabRegister">Daftar</button>
+  </div>
+  <div id="loginForm">
+    <div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="email@contoh.com"></div>
+    <div class="input-group"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <button class="btn-primary" onclick="doLogin()">MASUK</button>
+  </div>
+  <div id="registerForm" class="hidden">
+    <div class="input-group"><label>Username</label><input type="text" id="regUser" placeholder="Nama kamu"></div>
+    <div class="input-group"><label>Email</label><input type="email" id="regEmail" placeholder="email@contoh.com"></div>
+    <div class="input-group"><label>Password</label><input type="password" id="regPass" placeholder="Minimal 6 karakter"></div>
+    <button class="btn-primary" onclick="doRegister()">DAFTAR AKUN</button>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+  <div class="app-header">
+    <svg class="app-logo" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+      <circle cx="12" cy="14" r="1"></circle>
+      <circle cx="16" cy="14" r="1"></circle>
+      <circle cx="8" cy="14" r="1"></circle>
+    </svg>
+    <div class="app-title">JADWALMU</div>
+  </div>
+
+  <div id="viewJadwal" class="view-section active">
+    <div class="calendar-container">
+      <div class="calendar-header"><span id="monthYear"></span></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <button class="btn-primary" onclick="openAddModal()" style="margin-bottom: 20px;">+ Tambah Jadwal</button>
+    <div id="scheduleList"></div>
+  </div>
+
+  <div id="viewSetting" class="view-section">
+    <h3 style="margin-bottom: 20px;">Pengaturan</h3>
+    <div class="setting-item">
+      <div><h4>Mode Gelap</h4><p style="font-size:12px; opacity:0.7;">Ubah tema aplikasi</p></div>
+      <label class="switch"><input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()"><span class="slider"></span></label>
+    </div>
+    <div class="setting-item">
+      <div><h4>Suara Notifikasi</h4><p style="font-size:12px; opacity:0.7;">Upload nada MP3 kustom</p></div>
+      <input type="file" accept="audio/*" id="audioUpload" style="display:none;" onchange="handleAudioUpload(event)">
+      <button class="btn-secondary" style="width:auto; padding:8px 15px; margin:0;" onclick="document.getElementById('audioUpload').click()">Pilih File</button>
+    </div>
+  </div>
+
+  <div id="viewAkun" class="view-section">
+    <div class="profile-header">
+      <input type="file" accept="image/*" id="picUpload" style="display:none;" onchange="handlePicUpload(event)">
+      <img src="https://via.placeholder.com/150" class="profile-pic" id="profilePic" onclick="document.getElementById('picUpload').click()">
+      <h3 id="profileUsername"></h3>
+      <p style="font-size:12px; opacity:0.7;" id="profileEmail"></p>
+    </div>
+    <div class="input-group"><label>Ubah Username</label><input type="text" id="editUser"></div>
+    <div class="input-group"><label>Ubah Email</label><input type="email" id="editEmail"></div>
+    <div class="input-group"><label>Ubah Password</label><input type="password" id="editPass" placeholder="Isi untuk ubah"></div>
+    <button class="btn-primary" onclick="saveProfile()">Simpan Perubahan</button>
+    <button class="btn-secondary" onclick="doLogout()" style="border-color: #ff4444; color: #ff4444; margin-top: 20px;">LOG OUT</button>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" id="navJadwal" onclick="switchView('Jadwal')">
+      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+      JADWAL
+    </div>
+    <div class="nav-item" id="navSetting" onclick="switchView('Setting')">
+      <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+      SETTING
+    </div>
+    <div class="nav-item" id="navAkun" onclick="switchView('Akun')">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      AKUN
+    </div>
+  </div>
+</div>
+
+<div id="addModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <h3>Tambah Jadwal</h3>
+    <div class="input-group"><label>Nama Acara</label><input type="text" id="eventName" placeholder="Contoh: Main Game"></div>
+    <div class="input-group"><label>Tanggal</label><input type="date" id="eventDate"></div>
+    <div class="input-group"><label>Jam</label><input type="time" id="eventTime"></div>
+    <button class="btn-primary" onclick="saveSchedule()">SIMPAN JADWAL</button>
+    <button class="btn-secondary" onclick="closeAddModal()" style="border:none; color:var(--text); opacity:0.7;">Batal</button>
+  </div>
+</div>
 <script>
+  let user = JSON.parse(localStorage.getItem('jm_user')) || null;
+let schedules = JSON.parse(localStorage.getItem('jm_schedules')) || [];
+let isDarkMode = localStorage.getItem('jm_dark') === 'true';
 
+window.onload = () => {
+  if (isDarkMode) { document.body.classList.add('dark-mode'); document.getElementById('darkModeToggle').checked = true; }
+  if (!user) {
+    document.getElementById('authView').classList.remove('hidden');
+    document.getElementById('appView').classList.add('hidden');
+    setTimeout(() => { document.getElementById('notifPermission').classList.remove('hidden'); }, 1000);
+  } else { loadApp(); }
+};
 
-  const ACCOUNTS = [
-  {"username": "OWNER ALBY", "password": "OKEGAS", "owner": true},
-  {"username": "ALBY001", "password": "ThnkVMNNGF", "owner": false},
-  {"username": "ALBY002", "password": "ZXFlH3gNMu", "owner": false},
-  {"username": "ALBY003", "password": "aaYnIe5LBD", "owner": false},
-  {"username": "ALBY004", "password": "PJ7spv2UH0", "owner": false},
-  {"username": "ALBY005", "password": "uogXm0ykI7", "owner": false},
-  {"username": "ALBY006", "password": "qto5PpBQMR", "owner": false},
-  {"username": "ALBY007", "password": "QKmIRcZ8Mo", "owner": false},
-  {"username": "ALBY008", "password": "Lr8XvcBNHq", "owner": false},
-  {"username": "ALBY009", "password": "xlUJdpYbm3", "owner": false},
-  {"username": "ALBY010", "password": "3kgseFeJvT", "owner": false},
-  {"username": "ALBY011", "password": "9Dr39lkxOZ", "owner": false},
-  {"username": "ALBY012", "password": "3i1ShO5rVg", "owner": false},
-  {"username": "ALBY013", "password": "CHt2ZB3Uli", "owner": false},
-  {"username": "ALBY014", "password": "ocQ82Ynrfg", "owner": false},
-  {"username": "ALBY015", "password": "3GLqX9nZ2E", "owner": false},
-  {"username": "ALBY016", "password": "ss8HjKDDuF", "owner": false},
-  {"username": "ALBY017", "password": "KPuKQacXh3", "owner": false},
-  {"username": "ALBY018", "password": "sk4l3fvnwW", "owner": false},
-  {"username": "ALBY019", "password": "AZl4UNBWuf", "owner": false},
-  {"username": "ALBY020", "password": "pldqWqQI62", "owner": false},
-  {"username": "ALBY021", "password": "qCQlYBb8me", "owner": false},
-  {"username": "ALBY022", "password": "i7u3XLyp7n", "owner": false},
-  {"username": "ALBY023", "password": "rfvd13fLAk", "owner": false},
-  {"username": "ALBY024", "password": "aKaFGOV5RR", "owner": false},
-  {"username": "ALBY025", "password": "M8ROPFcY6P", "owner": false},
-  {"username": "ALBY026", "password": "jKludx8tCN", "owner": false},
-  {"username": "ALBY027", "password": "LRgj3Mumz6", "owner": false},
-  {"username": "ALBY028", "password": "Kpd1kFDdVi", "owner": false},
-  {"username": "ALBY029", "password": "yyKMLLU2wq", "owner": false},
-  {"username": "ALBY030", "password": "DcAJKLyyNX", "owner": false},
-  {"username": "ALBY031", "password": "G9bHQcyIBs", "owner": false},
-  {"username": "ALBY032", "password": "XkNeihrmzl", "owner": false},
-  {"username": "ALBY033", "password": "CgFIsMQVK4", "owner": false},
-  {"username": "ALBY034", "password": "DB3FcoeD0m", "owner": false},
-  {"username": "ALBY035", "password": "e41tQ1yzfI", "owner": false},
-  {"username": "ALBY036", "password": "34r39EFaHS", "owner": false},
-  {"username": "ALBY037", "password": "THs6PLaS0o", "owner": false},
-  {"username": "ALBY038", "password": "GjsXc2tBqU", "owner": false},
-  {"username": "ALBY039", "password": "OGjwCI18cV", "owner": false},
-  {"username": "ALBY040", "password": "QoiNo6XR8I", "owner": false},
-  {"username": "ALBY041", "password": "waACFWGG4N", "owner": false},
-  {"username": "ALBY042", "password": "KFyu2oLqWS", "owner": false},
-  {"username": "ALBY043", "password": "1oKzpRJo6t", "owner": false},
-  {"username": "ALBY044", "password": "2ZA4Vh3yZt", "owner": false},
-  {"username": "ALBY045", "password": "J0rXDLBmOq", "owner": false},
-  {"username": "ALBY046", "password": "jE1qtmF8i6", "owner": false},
-  {"username": "ALBY047", "password": "tE8CsI1TXq", "owner": false},
-  {"username": "ALBY048", "password": "hck8XZ3uUu", "owner": false},
-  {"username": "ALBY049", "password": "khwlTCwlo8", "owner": false},
-  {"username": "ALBY050", "password": "JF8v3m0axC", "owner": false},
-  {"username": "ALBY051", "password": "p9ae3CgHgl", "owner": false},
-  {"username": "ALBY052", "password": "hooh0ddxMk", "owner": false},
-  {"username": "ALBY053", "password": "4QFfUvfJFP", "owner": false},
-  {"username": "ALBY054", "password": "RwR124aKiG", "owner": false},
-  {"username": "ALBY055", "password": "kU6AcHz19c", "owner": false},
-  {"username": "ALBY056", "password": "tQkkrxwRIi", "owner": false},
-  {"username": "ALBY057", "password": "JEjidKT0at", "owner": false},
-  {"username": "ALBY058", "password": "GfDSoKeZjs", "owner": false},
-  {"username": "ALBY059", "password": "4yeA0jyI9f", "owner": false},
-  {"username": "ALBY060", "password": "ubqmXpCjWz", "owner": false},
-  {"username": "ALBY061", "password": "K3oRhT8rtI", "owner": false},
-  {"username": "ALBY062", "password": "WcQ4e0vdP5", "owner": false},
-  {"username": "ALBY063", "password": "mUX5Jari02", "owner": false},
-  {"username": "ALBY064", "password": "8YMvRklWtg", "owner": false},
-  {"username": "ALBY065", "password": "hz8uzqb3FD", "owner": false},
-  {"username": "ALBY066", "password": "v2z1OiB6Bo", "owner": false},
-  {"username": "ALBY067", "password": "j2RPxfVRL9", "owner": false},
-  {"username": "ALBY068", "password": "e1tfrWlKdO", "owner": false},
-  {"username": "ALBY069", "password": "Zu2HY5GNmG", "owner": false},
-  {"username": "ALBY070", "password": "nuCX9CdsDw", "owner": false},
-  {"username": "ALBY071", "password": "RocyW1RL6P", "owner": false},
-  {"username": "ALBY072", "password": "hoiabBQRP6", "owner": false},
-  {"username": "ALBY073", "password": "s7TOh4bUqk", "owner": false},
-  {"username": "ALBY074", "password": "CPsgk3fwG4", "owner": false},
-  {"username": "ALBY075", "password": "CEliYlwBWN", "owner": false},
-  {"username": "ALBY076", "password": "nvTsDowEPI", "owner": false},
-  {"username": "ALBY077", "password": "lcej8iYVYD", "owner": false},
-  {"username": "ALBY078", "password": "FveP3tOgq1", "owner": false},
-  {"username": "ALBY079", "password": "m0EcGqkDai", "owner": false},
-  {"username": "ALBY080", "password": "CKirMTMwSD", "owner": false},
-  {"username": "ALBY081", "password": "trvKWRyQ2i", "owner": false},
-  {"username": "ALBY082", "password": "HzwE49rrlY", "owner": false},
-  {"username": "ALBY083", "password": "7j3X22UTXG", "owner": false},
-  {"username": "ALBY084", "password": "iGWRqIlKjK", "owner": false},
-  {"username": "ALBY085", "password": "uGPX8U0a4L", "owner": false},
-  {"username": "ALBY086", "password": "aiEmfcaZsc", "owner": false},
-  {"username": "ALBY087", "password": "6pe1WL5VmM", "owner": false},
-  {"username": "ALBY088", "password": "yWNR8M0WzX", "owner": false},
-  {"username": "ALBY089", "password": "Gy7a1R7Tfb", "owner": false},
-  {"username": "ALBY090", "password": "bnKInB77nT", "owner": false},
-  {"username": "ALBY091", "password": "nddDYBqQxS", "owner": false},
-  {"username": "ALBY092", "password": "ZWs2jJpE8S", "owner": false},
-  {"username": "ALBY093", "password": "iBc1mf7lG8", "owner": false},
-  {"username": "ALBY094", "password": "aYtE5ZIvn4", "owner": false},
-  {"username": "ALBY095", "password": "RBntBq4h3J", "owner": false},
-  {"username": "ALBY096", "password": "KcJ3cpL430", "owner": false},
-  {"username": "ALBY097", "password": "gBfw3RCRas", "owner": false},
-  {"username": "ALBY098", "password": "0zLVJWoLz0", "owner": false},
-  {"username": "ALBY099", "password": "BeMXCjcEsF", "owner": false},
-  {"username": "ALBY100", "password": "Rf7neNlTuy", "owner": false}
-];
-
-const SHARED_MS = 48 * 60 * 60 * 1000;
-const REGISTERED_MS = 24 * 60 * 60 * 1000;
-const MAX_REGISTRATIONS = 3;
-const MAX_BYPASS_PER_DAY = 3;
-
-const SVG_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
-const SVG_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c6.5 0 10 7 10 7a18.45 18.45 0 0 1-3.16 4.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="2" y1="2" x2="22" y2="22"/></svg>';
-
-const $ = id => document.getElementById(id);
-
-// Ambil ID unik perangkat ini
-function getDeviceToken() {
-  let token = localStorage.getItem('device_token');
-  if (!token) {
-    token = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now().toString(36);
-    localStorage.setItem('device_token', token);
-  }
-  return token;
-}
-
-function fmtDur(ms) {
-  const t = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(t / 3600);
-  const m = Math.floor((t % 3600) / 60);
-  const s = t % 60;
-  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-}
-
-function escapeHTML(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function msg(t, cls) {
-  $('authMsg').className = 'status ' + (cls || '');
-  $('authMsg').innerHTML = t;
-}
-function showApp() {
-  $('loginView').classList.add('hidden');
-  $('appView').classList.remove('hidden');
-}
-function showLogin() {
-  $('appView').classList.add('hidden');
-  $('loginView').classList.remove('hidden');
-}
-
-let current = null;
-let clockTimer = null;
-let limitTimer = null;
-
-
-  // LOAD DATA DARI FIREBASE
-async function loadAccountData(username) {
-  try {
-    const docRef = doc(db, "users", username);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data();
-    }
-    return null;
-  } catch (e) {
-    console.error("Firebase Error:", e);
-    return null;
-  }
-}
-
-// SIMPAN DATA KE FIREBASE
-async function saveAccountData(username, data) {
-  try {
-    const docRef = doc(db, "users", username);
-    await setDoc(docRef, data, { merge: true });
-  } catch (e) {
-    console.error("Firebase Error:", e);
-  }
-}
-
-function updateTag() {
-  if (!current) return;
-  if (!current.expiresAt) {
-    $('userTag').innerHTML = '<strong>LOGIN: ' + escapeHTML(current.username) + '</strong><small>OWNER - Tanpa batas</small>';
-    return;
-  }
-  const left = current.expiresAt - Date.now();
-  if (left <= 0) { expireCurrent('Waktu akun habis. Silakan login ulang.'); return; }
-  $('userTag').innerHTML = '<strong>LOGIN: ' + escapeHTML(current.username) + '</strong><small>Sisa waktu: ' + fmtDur(left) + '</small>';
-}
-
-function startClock() {
-  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
-  updateTag();
-  if (current && current.expiresAt) clockTimer = setInterval(updateTag, 1000);
-}
-
-async function expireCurrent(reason) {
-  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
-  if (limitTimer) { clearInterval(limitTimer); limitTimer = null; }
-  
-  if (current) {
-    await saveAccountData(current.username, { isLoggedIn: false });
-    current = null;
-  }
-  localStorage.removeItem('sfl_session');
-  $('userTag').textContent = '';
-  showLogin();
-  msg(reason, 'error');
-}
-
-function openAccountModal() {
-  if (!current) return;
-  $('accountInfo').classList.add('hidden');
-  $('accountOverlay').classList.remove('hidden');
-}
-
-function closeAccountModal() {
-  $('accountOverlay').classList.add('hidden');
-}
-
-function showAccountInfo() {
-  if (!current) return;
-  $('accountInfo').innerHTML =
-    '<div><strong>AKUN:</strong> ' + escapeHTML(current.username) + '</div>' +
-    '<div><strong>STATUS:</strong> ' + (current.type === 'owner' ? 'OWNER' : 'REGULER') + '</div>';
-  $('accountInfo').classList.remove('hidden');
-}
-
-async function logout() {
-  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
-  if (limitTimer) { clearInterval(limitTimer); limitTimer = null; }
-  
-  if (current) {
-    await saveAccountData(current.username, { isLoggedIn: false });
-    current = null;
-  }
-  localStorage.removeItem('sfl_session');
-  $('userTag').textContent = '';
-  closeAccountModal();
-  showLogin();
-  $('loginPass').value = '';
-  msg('Berhasil keluar. Sisa waktu & kesempatan tetap berjalan di server.', 'success');
-}
-
-function switchTab(which) {
-  const isLogin = which === 'login';
-  $('loginForm').classList.toggle('hidden', !isLogin);
-  $('registerForm').classList.toggle('hidden', isLogin);
-  $('loginTab').classList.toggle('active', isLogin);
-  $('registerTab').classList.toggle('active', !isLogin);
-  if (isLogin) msg('');
-}
-
-async function updateBypassLimitUI() {
-  if (!current) return;
-  if (current.type === 'owner') {
-    $('limitInfo').style.display = 'none';
-    $('bypassBtn').textContent = 'Bypass';
-    $('bypassBtn').disabled = false;
-    $('bypassBtn').style.background = 'var(--accent)';
-    return;
-  }
-
-  const dbData = await loadAccountData(current.username);
-  if (!dbData) return;
-
-  const now = Date.now();
-  let limits = dbData.limits;
-
-  // Jika belum ada limit, atau resetAt sudah terlewat, reset jatah ke 3
-  if (!limits || now >= limits.resetAt) {
-    limits = { count: MAX_BYPASS_PER_DAY, resetAt: now + 24 * 60 * 60 * 1000 };
-    await saveAccountData(current.username, { limits: limits });
-  }
-
-  $('limitInfo').style.display = 'block';
-  
-  if (limits.count > 0) {
-    $('limitInfo').innerHTML = 'Sisa kesempatan bypass hari ini: <b>' + limits.count + ' / ' + MAX_BYPASS_PER_DAY + '</b>';
-    $('bypassBtn').textContent = 'Bypass';
-    $('bypassBtn').disabled = false;
-    $('bypassBtn').style.background = 'var(--accent)';
+function requestNotif() {
+  if (window.cordova && cordova.plugins && cordova.plugins.notification) {
+    cordova.plugins.notification.local.requestPermission(function (granted) {
+      document.getElementById('notifPermission').classList.add('hidden');
+    });
+  } else if ("Notification" in window) {
+    Notification.requestPermission().then(() => { document.getElementById('notifPermission').classList.add('hidden'); }); 
   } else {
-    $('limitInfo').innerHTML = '<span class="error">Kesempatan bypass habis!</span> Tunggu 24 jam.';
-    $('bypassBtn').disabled = true;
-    $('bypassBtn').style.background = 'var(--muted)';
-    
-    if (limitTimer) clearInterval(limitTimer);
-    limitTimer = setInterval(() => {
-      const left = limits.resetAt - Date.now();
-      if (left <= 0) {
-        clearInterval(limitTimer);
-        updateBypassLimitUI();
-        return;
-      }
-      $('bypassBtn').textContent = 'Tunggu ' + fmtDur(left);
-    }, 1000);
+    document.getElementById('notifPermission').classList.add('hidden');
   }
 }
 
-async function login() {
-  const u = $('loginUser').value.trim();
-  const p = $('loginPass').value;
-  const account = ACCOUNTS.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+document.getElementById('tabLogin').onclick = () => {
+  document.getElementById('tabLogin').classList.add('active'); document.getElementById('tabRegister').classList.remove('active');
+  document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden');
+};
+document.getElementById('tabRegister').onclick = () => {
+  document.getElementById('tabRegister').classList.add('active'); document.getElementById('tabLogin').classList.remove('active');
+  document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden');
+};
+
+function doRegister() {
+  const u = document.getElementById('regUser').value;
+  const e = document.getElementById('regEmail').value;
+  const p = document.getElementById('regPass').value;
+  if(!u || !e || !p) return alert('Isi semua kolom!');
+  user = { username: u, email: e, password: p, profilePic: 'https://via.placeholder.com/150' };
+  localStorage.setItem('jm_user', JSON.stringify(user));
+  alert('Daftar berhasil! Silakan login.'); document.getElementById('tabLogin').click();
+}
+function doLogin() {
+  const e = document.getElementById('loginEmail').value; const p = document.getElementById('loginPass').value;
+  if(!user) return alert('Belum ada akun, silakan daftar dulu.');
+  if(e === user.email && p === user.password) { loadApp(); } else { alert('Email atau Password salah!'); }
+}
+function doLogout() { localStorage.removeItem('jm_user'); location.reload(); }
+function loadApp() {
+  document.getElementById('authView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden');
+  document.getElementById('profileUsername').innerText = user.username; document.getElementById('profileEmail').innerText = user.email;
+  document.getElementById('profilePic').src = user.profilePic;
+  document.getElementById('editUser').value = user.username; document.getElementById('editEmail').value = user.email;
+  renderCalendar(); renderSchedules();
+}
+function switchView(view) {
+  document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view' + view).classList.add('active'); document.getElementById('nav' + view).classList.add('active');
+}
+
+let currentDate = new Date();
+function renderCalendar() {
+  const monthYear = document.getElementById('monthYear'); const grid = document.getElementById('calendarGrid');
+  const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  monthYear.innerText = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+  grid.innerHTML = '';
+  ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].forEach(d => { grid.innerHTML += `<div class="cal-day">${d}</div>`; });
+  const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  for(let i=0; i<firstDay; i++) { grid.innerHTML += `<div></div>`; }
+  for(let i=1; i<=daysInMonth; i++) {
+    const today = new Date();
+    const isToday = i === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear();
+    grid.innerHTML += `<div class="cal-date ${isToday ? 'today' : ''}">${i}</div>`;
+  }
+}
+
+function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
+function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+
+function saveSchedule() {
+  const name = document.getElementById('eventName').value; 
+  const date = document.getElementById('eventDate').value; 
+  const time = document.getElementById('eventTime').value;
   
-  if (!account) { msg('Username atau password salah.', 'error'); return; }
-
-  msg('Memeriksa server...', 'success');
-  const token = getDeviceToken();
-  const now = Date.now();
-
-  // ===== OWNER =====
-  if (account.owner) {
-    current = { username: account.username, type: 'owner', expiresAt: null, token: token };
-    localStorage.setItem('sfl_session', JSON.stringify(current));
-    msg('');
-    showApp();
-    startClock();
-    updateBypassLimitUI();
-    return;
-  }
-
-  // ===== AKUN ONLINE =====
-  const dbData = await loadAccountData(account.username);
+  if(!name || !date || !time) return alert('Lengkapi semua data!');
   
-  // Cek apakah akun sedang dipakai di HP lain
-  if (dbData && dbData.isLoggedIn && dbData.deviceToken !== token) {
-    msg('AKUN SEDANG DIPAKAI!<br>Orang lain sedang login dengan akun ini. Silakan tunggu sampai mereka logout.', 'error');
-    return;
-  }
-
-  // ===== AKUN DAFTAR =====
-  if (account.registered) {
-    let expiresAt = dbData ? dbData.expiresAt : now + REGISTERED_MS;
-    if (now >= expiresAt) {
-      msg('Masa berlaku akun sudah habis (24 jam).', 'error');
-      return;
-    }
-    await saveAccountData(account.username, { isLoggedIn: true, deviceToken: token, expiresAt: expiresAt });
-    current = { username: account.username, type: 'registered', expiresAt: expiresAt, token: token };
-    localStorage.setItem('sfl_session', JSON.stringify(current));
-    msg('');
-    showApp();
-    startClock();
-    updateBypassLimitUI();
-    return;
-  }
-
-  // ===== AKUN 100 ALBY =====
-  let expiresAt;
-  if (dbData && dbData.expiresAt > now) {
-    expiresAt = dbData.expiresAt; // Lanjutkan sisa waktu
+  const timestamp = new Date(`${date}T${time}`).getTime();
+  
+  schedules.push({ id: Date.now(), name, timestamp });
+  localStorage.setItem('jm_schedules', JSON.stringify(schedules));
+  
+  if (window.cordova && cordova.plugins && cordova.plugins.notification) {
+    cordova.plugins.notification.local.schedule({
+      id: Date.now(),
+      title: 'JADWALMU: ' + name,
+      text: 'Acara kamu sudah dimulai!',
+      trigger: { at: new Date(timestamp) },
+      foreground: true,
+      vibrate: true
+    });
+    alert("Jadwal disimpan & Alarm Notifikasi telah diatur!");
   } else {
-    expiresAt = now + SHARED_MS; // Sesi baru
+    alert("Jadwal disimpan! (Buka di APK biar notifnya bunyi walau ditutup)");
   }
 
-  await saveAccountData(account.username, { isLoggedIn: true, deviceToken: token, expiresAt: expiresAt });
-  current = { username: account.username, type: 'shared', expiresAt: expiresAt, token: token };
-  localStorage.setItem('sfl_session', JSON.stringify(current));
-  msg('');
-  showApp();
-  startClock();
-  updateBypassLimitUI();
+  closeAddModal(); 
+  renderSchedules();
 }
 
-function register() {
-  // Fitur daftar dimatikan sementara untuk versi online
-  msg('Pendaftaran akun baru dinonaktifkan di versi online ini.', 'error');
-}
-
-async function restore() {
-  const s = localStorage.getItem('sfl_session');
-  if (!s) return;
-  
-  current = JSON.parse(s);
-  const now = Date.now();
-
-  if (current.type !== 'owner' && current.expiresAt && now >= current.expiresAt) {
-    expireCurrent('Waktu sesi berakhir.');
-    return;
-  }
-
-  showApp();
-  startClock();
-  await updateBypassLimitUI();
-}
-
-function setupEye(inputId, btnId) {
-  const input = $(inputId);
-  const btn = $(btnId);
-  btn.innerHTML = SVG_EYE;
-  btn.addEventListener('click', () => {
-    const show = input.type === 'password';
-    input.type = show ? 'text' : 'password';
-    btn.setAttribute('aria-pressed', show ? 'true' : 'false');
-    btn.innerHTML = show ? SVG_EYE_OFF : SVG_EYE;
+function renderSchedules() {
+  const list = document.getElementById('scheduleList'); list.innerHTML = '';
+  if(schedules.length === 0) { list.innerHTML = '<p style="text-align:center; opacity:0.5; font-size:14px;">Belum ada jadwal.</p>'; return; }
+  schedules.sort((a,b) => a.timestamp - b.timestamp);
+  schedules.forEach(s => {
+    const d = new Date(s.timestamp);
+    const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    list.innerHTML += `<div class="schedule-card"><div class="schedule-info"><h4>${s.name}</h4><p>${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} - ${timeStr}</p></div><div class="countdown" id="cd-${s.id}">...</div></div>`;
   });
+  updateCountdowns();
 }
 
-let destination = '';
-let lastBypassedUrl = localStorage.getItem('sfl_last_bypassed_url') || '';
-let pendingSameUrl = false;
-
-function wireEvents() {
-  $('userTag').addEventListener('click', openAccountModal);
-  $('logoutBtn').onclick = logout;
-  $('accountInfoBtn').onclick = showAccountInfo;
-  $('closeAccountModal').onclick = closeAccountModal;
-  $('accountOverlay').addEventListener('click', e => {
-    if (e.target === $('accountOverlay')) closeAccountModal();
-  });
-  
-  $('loginTab').onclick = () => switchTab('login');
-  $('registerTab').onclick = () => switchTab('register');
-  $('loginBtn').onclick = login;
-  $('regBtn').onclick = register;
-
-  $('sflInput').addEventListener('input', () => {
-    if (pendingSameUrl) {
-      pendingSameUrl = false;
-      updateBypassLimitUI();
-      $('result').innerHTML = '';
-    }
-  });
-
-  $('bypassBtn').onclick = async () => {
-    if (!current) return;
-    
-    const raw = $('sflInput').value.trim();
-
-    if (!raw) { $('result').textContent = 'Masukkan link SFL dulu.'; return; }
-    if (!/^https?:\/\//i.test(raw)) {
-      $('result').textContent = 'Link harus diawali http:// atau https://';
-      return;
-    }
-
-    if (current.type !== 'owner' && raw === lastBypassedUrl && !pendingSameUrl) {
-      pendingSameUrl = true;
-      $('result').innerHTML = '<div class="warning-box">INFORMASI!<br><br>Link SFL yang dimasukkan masih sama dengan sebelumnya.<br>Silakan ganti link terlebih dahulu, atau klik tombol di bawah untuk melanjutkan (kesempatan bypass akan berkurang).</div>';
-      $('bypassBtn').textContent = 'Lanjutkan (-1 Kesempatan)';
-      $('bypassBtn').style.background = '#ff9800';
-      return;
-    }
-
-    pendingSameUrl = false;
-    await updateBypassLimitUI();
-    $('result').innerHTML = '';
-
-    // POTONG LIMIT DI FIREBASE
-    if (current.type !== 'owner') {
-      const dbData = await loadAccountData(current.username);
-      if (dbData && dbData.limits && dbData.limits.count > 0) {
-        let newLimits = dbData.limits;
-        newLimits.count--;
-        await saveAccountData(current.username, { limits: newLimits });
-        await updateBypassLimitUI();
-      } else {
-        return;
-      }
-    }
-
-    localStorage.setItem('sfl_last_bypassed_url', raw);
-    lastBypassedUrl = raw;
-
-    let dots = 0;
-    $('result').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;"><span class="spinner"></span><span id="loadingMsg">Memproses.</span></div>';
-    const loadingInterval = setInterval(() => {
-      dots = (dots + 1) % 3;
-      const dotText = '.'.repeat(dots + 1);
-      const msgEl = document.getElementById('loadingMsg');
-      if (msgEl) msgEl.textContent = 'Memproses' + dotText;
-    }, 500);
-
-    let found = null;
-    const apis = [
-      u => 'https://api.botcahx.eu.org/api/tools/bypass-sfl?url=' + encodeURIComponent(u),
-      u => 'https://api.siputzx.my.id/api/tools/bypass?url=' + encodeURIComponent(u),
-      u => 'https://api.vreden.my.id/api/bypass?url=' + encodeURIComponent(u),
-      u => 'https://api.zenkey.my.id/api/tools/bypass?url=' + encodeURIComponent(u)
-    ];
-
-    for (const api of apis) {
-      try {
-        const res = await fetch(api(raw));
-        if (!res.ok) continue;
-        const data = await res.json();
-        
-        const findMF = (obj) => {
-          if (typeof obj === 'string') {
-            if (obj.includes('mediafire.com')) return obj;
-          }
-          if (Array.isArray(obj)) {
-            for (const i of obj) { const f = findMF(i); if (f) return f; }
-          }
-          if (typeof obj === 'object' && obj !== null) {
-            for (const k in obj) { const f = findMF(obj[k]); if (f) return f; }
-          }
-          return null;
-        };
-
-        const result = findMF(data);
-        if (result) {
-          found = result;
-          break;
-        }
-      } catch (e) {}
-    }
-
-    clearInterval(loadingInterval);
-
-    if (found) {
-      destination = found;
-      $('result').innerHTML = '<span class="success">Link MediaFire ditemukan:</span><br>' + escapeHTML(destination);
-      if ($('autoOpen').checked) {
-        window.open(destination, '_blank', 'noopener,noreferrer');
-        $('result').innerHTML += '<br>Mencoba membuka tab baru...';
-      } else {
-        $('manualActions').classList.remove('hidden');
-        $('openBtn').textContent = 'Buka Link MediaFire';
-        $('copyBtn').textContent = 'Salin Link MediaFire';
-        $('copyBtn').style.display = 'block';
-        $('openBtn').onclick = () => window.open(destination, '_blank', 'noopener,noreferrer');
-      }
+setInterval(updateCountdowns, 1000);
+function updateCountdowns() {
+  schedules.forEach(s => {
+    const el = document.getElementById(`cd-${s.id}`); if(!el) return;
+    const diff = s.timestamp - Date.now();
+    if (diff <= 0) { 
+      el.innerText = "WAKTUNYA!"; el.style.background = "#ff4444"; el.style.color = "#fff"; 
     } else {
-      $('result').innerHTML = 'Link tujuan belum berhasil ditemukan.<br><br>API publik sedang sibuk. Coba klik Bypass sekali lagi.';
-      destination = '';
-      $('manualActions').classList.remove('hidden');
-      $('openBtn').textContent = 'Buka link SFL manual';
-      $('openBtn').onclick = () => window.open(raw, '_blank', 'noopener,noreferrer');
-      $('copyBtn').style.display = 'none';
+      el.innerText = `${Math.floor(diff/86400000)}h ${Math.floor((diff%86400000)/3600000)}j ${Math.floor((diff%3600000)/60000)}m ${Math.floor((diff%60000)/1000)}s`;
     }
-  };
-
-  $('copyBtn').onclick = async () => {
-    if (!destination) return;
-    try {
-      await navigator.clipboard.writeText(destination);
-      $('result').innerHTML = '<span class="success">Berhasil menyalin Link MediaFire!</span><br>' + escapeHTML(destination);
-    } catch (e) {
-      $('result').textContent = 'Gagal menyalin. Silakan salin manual.';
-    }
-  };
+  });
 }
 
-setupEye('loginPass', 'loginEye');
-wireEvents();
-restore();
+function toggleDarkMode() {
+  if (document.getElementById('darkModeToggle').checked) { document.body.classList.add('dark-mode'); localStorage.setItem('jm_dark', 'true'); } 
+  else { document.body.classList.remove('dark-mode'); localStorage.setItem('jm_dark', 'false'); }
+}
+function handleAudioUpload(e) { if(e.target.files[0]) alert('Suara diatur: ' + e.target.files[0].name); }
+function handlePicUpload(e) {
+  const file = e.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = function(event) { user.profilePic = event.target.result; document.getElementById('profilePic').src = user.profilePic; localStorage.setItem('jm_user', JSON.stringify(user)); };
+    reader.readAsDataURL(file);
+  }
+}
+function saveProfile() {
+  user.username = document.getElementById('editUser').value; user.email = document.getElementById('editEmail').value;
+  const newPass = document.getElementById('editPass').value; if(newPass) user.password = newPass;
+  localStorage.setItem('jm_user', JSON.stringify(user)); alert('Profil diperbarui!'); loadApp();
+}
 </script>
 </body>
 </html>
