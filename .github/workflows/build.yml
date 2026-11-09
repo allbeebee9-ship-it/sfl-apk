@@ -17,7 +17,8 @@ jobs:
     - name: Build APK with Notifications
       run: |
         cordova platform add android
-        cordova plugin add cordova-plugin-local-notifications
+        cordova plugin add cordova-plugin-device
+        cordova plugin add cordova-plugin-local-notification
         cordova build android
     - name: Upload APK
       uses: actions/upload-artifact@v4
