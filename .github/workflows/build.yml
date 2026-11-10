@@ -19,6 +19,7 @@ jobs:
         cordova platform add android
         cordova plugin add cordova-plugin-device
         cordova plugin add cordova-plugin-local-notification
+        cordova plugin add cordova-plugin-android-permissions
         cordova build android
     - name: Upload APK
       uses: actions/upload-artifact@v4
