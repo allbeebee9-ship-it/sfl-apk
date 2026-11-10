@@ -1,10 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.jadwalmu.id" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.alby.jadwalmu" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>JADWALMU</name>
     <description>Aplikasi Pengingat Jadwal</description>
     <author email="alby@example.com" href="#">Alby</author>
     
     <content src="index.html" />
+    
+    <!-- MATIKAN LOGO ROBOT BAWAAN CORDOVA -->
+    <preference name="SplashScreen" value="none" />
+    <preference name="SplashScreenDelay" value="0" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="FadeSplashScreen" value="false" />
     
     <allow-navigation href="*" />
     <allow-intent href="*" />
